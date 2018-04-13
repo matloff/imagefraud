@@ -43,4 +43,4 @@ for (i in 1:(width-boxside+1)){
 
 ))
 # sort by all columns
-print(system.time(test <- test[do.call(order, lapply(1:(boxside^2), function(i) test[,i])),]))
+print(system.time(test <- test[do.call(order, lapply(1:ncol(test), function(i) test[,i])),]))
