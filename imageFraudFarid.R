@@ -18,7 +18,7 @@ width<-ncol(pic)
 height<-nrow(pic)
 approx <- matrix(nrow = height, ncol = width)
 boxside <- 8
-size <- (height*width)/boxside
+size <- (height*width)/(boxside^2)
 test <- matrix(nrow = size, ncol = (boxside^2) + 2)
 q <- 256
 print(system.time(
