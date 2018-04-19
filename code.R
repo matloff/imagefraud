@@ -118,13 +118,45 @@ faridPca <- function(img)
 		}
 	}
 
-	# da Arielle thing
-	frequentOffsets <- list()
-	sortedOffsets <- offsets[do.call(order, lapply(1:2,
-		function(i) offsets[,i])),]
-	print(sortedOffsets)
-	# for (offset in sortedOffsets)
-	# {
+	# print(offsets)
 
-	# }
+	frequentOffsets <- list()
+	numFrequentOffsets <- 0
+	# Source: https://stackoverflow.com/questions/28100593/how-to-sort-a-list-of-lists-in-r?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+	tmp <- offsets[order(sapply(offsets,'[[',2))]
+	sortedOffsets <- tmp[order(sapply(tmp,'[[',1))]
+	# print(sortedOffsets)
+	offsetFrequency <- 0
+	previousOffset <- list(-1,-1)
+	for (offset in sortedOffsets)
+	{
+		if (offset[[1]] == previousOffset[[1]] &&
+			offset[[2]] == previousOffset[[2]])
+		{
+			offsetFrequency <- offsetFrequency + 1
+		} else {
+			# Found new offset.
+			# print("numFrequentOffsets")
+			# print(numFrequentOffsets)
+			# print("previousOffset")
+			# print(previousOffset)
+			# print("frequentOffsets")
+			# print(frequentOffsets)
+			if (offsetFrequency >= N_f) {
+				numFrequentOffsets <- numFrequentOffsets + 1
+				frequentOffsets[[numFrequentOffsets]] <- previousOffset
+			}
+
+			# Reset for this new offset.
+			offsetFrequency <- 0
+		}
+		previousOffset <- offset
+	}
+
+	print("frequentOffsets")
+	print(frequentOffsets)
+
+	# TODO:
+	# 1) figure out the coordinates that correspond to that block
+	# 2) set entire corresponding block to black, not just top-left coordinate
 }
