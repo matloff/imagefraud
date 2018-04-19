@@ -61,8 +61,8 @@ for (i in 1:(size-51)){
   for (j in (i+1):(i+50)) {
     # if box is match
   if (all(test[i,1:(boxside^2)] == test[j,1:(boxside^2)]) && (j != i)){
-    d1 <- i - test[i,((boxside^2)+1)]
-    d2 <- j - test[i,((boxside^2)+2)]
+    d1 <- test[j,((boxside^2)+1)] - test[i,((boxside^2)+1)]
+    d2 <- test[j,((boxside^2)+2)] - test[i,((boxside^2)+2)]
     Nd[i,1] <- sqrt(d1^2 + d2^2)
     # if distance less than threshold it doesnt count as copied
     if (Nd[i] < thresh) {
