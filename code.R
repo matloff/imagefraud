@@ -104,11 +104,11 @@ faridPca <- function(img)
 		xj <- coordinates2[1]
 		yj <- coordinates2[2]
 		if (xi - xj > 0) {
-			offset <- list(xi - xj, yi - yj)
+			offset <- list(xi - xj, yi - yj, xi, yi, xj, yj)
 		} else if (xi - xj < 0) {
-			offset <- list(xj - xi, yi - yj)
+			offset <- list(xj - xi, yi - yj, xi, yi, xj, yj)
 		} else {
-			offset <- list(0, abs(yi - yj))
+			offset <- list(0, abs(yi - yj), xi, yi, xj, yj)
 		}
 
 		if (sqrt((offset[[1]])^2 + (offset[[2]])^2) >= N_d) {
@@ -159,4 +159,23 @@ faridPca <- function(img)
 	# TODO:
 	# 1) figure out the coordinates that correspond to that block
 	# 2) set entire corresponding block to black, not just top-left coordinate
+
+	imgWithBlocks <- img  # make copy of the image
+
+	for (frequentOffset in frequentOffsets) {
+		coordinate1 <- frequentOffset[3:4]
+		coordinate2 <- frequentOffset[5:6]
+
+		# browser()
+
+		imgWithBlocks[coordinate1[[1]],coordinate1[[2]],] <- 0
+		imgWithBlocks[coordinate2[[1]],coordinate2[[2]],] <- 0
+	}
+
+	# print(imgWithBlocks)
+	# plot(imgWithBlocks)
+	plot.new()
+	plot.window(xlim=c(0,imgWidth), ylim=c(0,imgHeight))
+	rasterImage(imgWithBlocks, xleft=0, xright =imgWidth, ybottom=0,ytop=imgHeight)
+	# points(imgWithBlocks)
 }
