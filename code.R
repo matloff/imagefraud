@@ -3,8 +3,35 @@ library(scales)
 
 faridPca <- function(img)
 {
-	# convert image to its matrix representation 
 	img <- readJPEG(img)
+
+	redChannel <- img[,,1]
+	greenChannel <- img[,,2]
+	blueChannel <- img[,,3]
+
+	imgWithBlocks <- img
+	imgWidth <- dim(img)[2]
+	imgHeight <- dim(img)[1]
+
+	redSlice <- channelPca(img, 1)
+	greenSlice <- channelPca(img, 2)
+	blueSlice <- channelPca(img, 3)
+
+	plot.new()
+	plot.window(xlim=c(0,imgWidth), ylim=c(0,imgHeight))
+	imgWithBlocks[,,1] <- redSlice
+	imgWithBlocks[,,2] <- greenSlice
+	imgWithBlocks[,,3] <- blueSlice
+
+
+	rasterImage(imgWithBlocks, xleft=0, xright =imgWidth, ybottom=0,ytop=imgHeight)
+
+
+}
+
+channelPca <- function(img, channelValue)
+{
+	channel <- img[,,channelValue]
 
 	imgDim <- dim(img)
 	N <- imgDim[1] * imgDim[2]
@@ -23,12 +50,6 @@ faridPca <- function(img)
 	# TODO: change this
 	N_t <- 8
 
-	# extract the individual color value matrices
-	# to perform PCA on each 
-	redChannel <- img[,,1]
-	greenChannel <- img[,,2]
-	blueChannel <- img[,,3]
-
 	# To help the upcoming double for loop.
 	topLeftX <- 1
 	topLeftY <- 1
@@ -43,44 +64,53 @@ faridPca <- function(img)
 	# The max size of a row is whatever the max size of N_t is (i.e. b).
 	# Have two extra spots in each row to hold the x and y coordinate of the
 	# top left of the corresponding block (top left of image is (0,0)).
-	blocks <- matrix(0, nrow = N_b, ncol = b + 2)
+	redBlocks <- matrix(0, nrow = N_b, ncol = b + 2)
+	greenBlocks <- matrix(0, nrow = N_b, ncol = b + 2)
+	blueBlocks <- matrix(0, nrow = N_b, ncol = b + 2)
 
 	blockIndex <- 1
 	for (rowIndex in 1:numSlidingBlocksPerCol)
 	{
 		for (colIndex in 1:numSlidingBlocksPerRow)
 		{
-			redBlock <- redChannel[rowIndex:(rowIndex+blockHeight-1),
+			# PERFORMING PCA ON ONE BLOCK
+			#gets specific block for one color channel
+			redBlock <- channel[rowIndex:(rowIndex+blockHeight-1),
 			                       colIndex:(colIndex+blockWidth-1)]
+			#performs PCA on specified block for one color channel
 			redBlockPca <- prcomp(redBlock, center = FALSE)
+			#compresses PCA results into a vector for specified red block
 			redBlockCompressed <- as.vector(
 				redBlockPca$x[,1:N_t] %*% t(redBlockPca$rotation[,1:N_t]))
-			# print(redBlockCompressed[1])
-			# print(redBlockCompressed[2])
-			# print(redBlockCompressed[1] == redBlockCompressed[2])
+			# each matrix with each row containing a compressed block of the one color channel block
+			redBlocks[blockIndex,(1:b)] <- as.vector(redBlockCompressed)
+			# storing the block's coordinates for easier lookup for the one color channel block
+			redBlocks[blockIndex,(b+1):(b+2)] <- c(rowIndex,colIndex)
+
+			# increasing blockIndex for the matrix 
+			blockIndex <- blockIndex + 1
+
+			# TODO: 
+			# delete later
+			# old way we quantized vectors
 			# redBlockQuantized <- as.vector(round(rescale(redBlockCompressed,
 			# 	 to = c(0, q))))
 			# redBlockQuantized <- floor(redBlockCompressed / Q)
 			# blocks[blockIndex,1:b] <- redBlockQuantized
-			blocks[blockIndex,(1:b)] <- as.vector(redBlockCompressed)
-
-			# Store this block's coordinate.
-			blocks[blockIndex,(b+1):(b+2)] <- c(rowIndex,colIndex)
-
-			blockIndex <- blockIndex + 1
 		}
 	}
 
-	S <- blocks[do.call(order, lapply(1:(b+2), function(i) blocks[,i])),]
+	# sorts the rows in lexographic order for redChannel
+	redS <- redBlocks[do.call(order, lapply(1:(b+2), function(i) redBlocks[,i])),]
 
-	# Note that the last two coordinates of each row in S are the
+	# Note that the last two coordinates of each row in redS are the
 	# coordinates of the block corresponding to that row.
 	# offsets stores every pair of coordinates of rows that are within
 	# N_n of each other.
 	coordinatePairs <- list()
 
 	numCoordinatePairs <- 0
-	for (rowIndex in 1:(nrow(S)-N_n))
+	for (rowIndex in 1:(nrow(redS)-N_n))
 	{
 		for (rowAppend in 1:(N_n-1))
 		{
@@ -88,8 +118,8 @@ faridPca <- function(img)
 
 			#first is coordinates of block1
 			#second is coordinates of block2
-			coordinatePairs[[numCoordinatePairs]] <- list(first=S[rowIndex,(b+1):(b+2)],
-				second=S[rowIndex+rowAppend,(b+1):(b+2)])
+			coordinatePairs[[numCoordinatePairs]] <- list(first=redS[rowIndex,(b+1):(b+2)],
+				second=redS[rowIndex+rowAppend,(b+1):(b+2)])
 		}
 	}
 
@@ -153,8 +183,8 @@ faridPca <- function(img)
 		previousOffset <- offset
 	}
 
-	print("frequentOffsets")
-	print(frequentOffsets)
+	# print("frequentOffsets")
+	# print(frequentOffsets)
 
 	# TODO:
 	# 1) figure out the coordinates that correspond to that block
@@ -174,8 +204,12 @@ faridPca <- function(img)
 
 	# print(imgWithBlocks)
 	# plot(imgWithBlocks)
-	plot.new()
-	plot.window(xlim=c(0,imgWidth), ylim=c(0,imgHeight))
-	rasterImage(imgWithBlocks, xleft=0, xright =imgWidth, ybottom=0,ytop=imgHeight)
+	# plot.new()
+	# plot.window(xlim=c(0,imgWidth), ylim=c(0,imgHeight))
+	#rasterImage(imgWithBlocks, xleft=0, xright =imgWidth, ybottom=0,ytop=imgHeight)
 	# points(imgWithBlocks)
-}
+
+	return(imgWithBlocks[,,channelValue])
+	# TODO: Change it to blocks
+	# not just top left
+} #end of channelPca
