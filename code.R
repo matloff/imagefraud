@@ -1,7 +1,13 @@
+#libraries required for pca
 library(jpeg)
 library(scales)
 
-faridPca <- function(img)
+#libraries required for nmf
+library(NMF)
+library(pixmap)
+
+faridPca <- function(img, compressMethod)
+# compressMethod is either the string pca or 
 {
 	img <- readJPEG(img)
 
@@ -13,9 +19,9 @@ faridPca <- function(img)
 	imgWidth <- dim(img)[2]
 	imgHeight <- dim(img)[1]
 
-	redSlice <- channelPca(img, 1)
-	greenSlice <- channelPca(img, 2)
-	blueSlice <- channelPca(img, 3)
+	redSlice <- channelPca(img, 1, compressMethod)
+	greenSlice <- channelPca(img, 2, compressMethod)
+	blueSlice <- channelPca(img, 3, compressMethod)
 
 	plot.new()
 	plot.window(xlim=c(0,imgWidth), ylim=c(0,imgHeight))
@@ -29,7 +35,12 @@ faridPca <- function(img)
 
 }
 
-channelPca <- function(img, channelValue)
+compressBlocks <- function()
+{
+
+}
+
+channelPca <- function(img, channelValue, compressMethod)
 {
 	channel <- img[,,channelValue]
 
@@ -64,9 +75,7 @@ channelPca <- function(img, channelValue)
 	# The max size of a row is whatever the max size of N_t is (i.e. b).
 	# Have two extra spots in each row to hold the x and y coordinate of the
 	# top left of the corresponding block (top left of image is (0,0)).
-	redBlocks <- matrix(0, nrow = N_b, ncol = b + 2)
-	greenBlocks <- matrix(0, nrow = N_b, ncol = b + 2)
-	blueBlocks <- matrix(0, nrow = N_b, ncol = b + 2)
+	blocks <- matrix(0, nrow = N_b, ncol = b + 2)
 
 	blockIndex <- 1
 	for (rowIndex in 1:numSlidingBlocksPerCol)
@@ -75,17 +84,25 @@ channelPca <- function(img, channelValue)
 		{
 			# PERFORMING PCA ON ONE BLOCK
 			#gets specific block for one color channel
-			redBlock <- channel[rowIndex:(rowIndex+blockHeight-1),
+			block <- channel[rowIndex:(rowIndex+blockHeight-1),
 			                       colIndex:(colIndex+blockWidth-1)]
 			#performs PCA on specified block for one color channel
-			redBlockPca <- prcomp(redBlock, center = FALSE)
-			#compresses PCA results into a vector for specified red block
-			redBlockCompressed <- as.vector(
-				redBlockPca$x[,1:N_t] %*% t(redBlockPca$rotation[,1:N_t]))
+			if (compressMethod == "pca")
+			{
+				blockPca <- prcomp(block, center = FALSE)
+				#compresses PCA results into a vector for specified red block
+				blockCompressed <- as.vector(
+					blockPca$x[,1:N_t] %*% t(blockPca$rotation[,1:N_t]))
+			}
+			if (compressMethod == "nmf")
+			{
+				blockPca <- nmf(block,2)
+				blockCompressed <- blockPca@fit@W %*% blockPca@fit@H
+			}
 			# each matrix with each row containing a compressed block of the one color channel block
-			redBlocks[blockIndex,(1:b)] <- as.vector(redBlockCompressed)
+			blocks[blockIndex,(1:b)] <- as.vector(blockCompressed)
 			# storing the block's coordinates for easier lookup for the one color channel block
-			redBlocks[blockIndex,(b+1):(b+2)] <- c(rowIndex,colIndex)
+			blocks[blockIndex,(b+1):(b+2)] <- c(rowIndex,colIndex)
 
 			# increasing blockIndex for the matrix 
 			blockIndex <- blockIndex + 1
@@ -93,24 +110,24 @@ channelPca <- function(img, channelValue)
 			# TODO: 
 			# delete later
 			# old way we quantized vectors
-			# redBlockQuantized <- as.vector(round(rescale(redBlockCompressed,
+			# blockQuantized <- as.vector(round(rescale(blockCompressed,
 			# 	 to = c(0, q))))
-			# redBlockQuantized <- floor(redBlockCompressed / Q)
-			# blocks[blockIndex,1:b] <- redBlockQuantized
+			# blockQuantized <- floor(blockCompressed / Q)
+			# blocks[blockIndex,1:b] <- blockQuantized
 		}
 	}
 
 	# sorts the rows in lexographic order for redChannel
-	redS <- redBlocks[do.call(order, lapply(1:(b+2), function(i) redBlocks[,i])),]
+	S <- blocks[do.call(order, lapply(1:(b+2), function(i) blocks[,i])),]
 
-	# Note that the last two coordinates of each row in redS are the
+	# Note that the last two coordinates of each row in S are the
 	# coordinates of the block corresponding to that row.
 	# offsets stores every pair of coordinates of rows that are within
 	# N_n of each other.
 	coordinatePairs <- list()
 
 	numCoordinatePairs <- 0
-	for (rowIndex in 1:(nrow(redS)-N_n))
+	for (rowIndex in 1:(nrow(S)-N_n))
 	{
 		for (rowAppend in 1:(N_n-1))
 		{
@@ -118,8 +135,8 @@ channelPca <- function(img, channelValue)
 
 			#first is coordinates of block1
 			#second is coordinates of block2
-			coordinatePairs[[numCoordinatePairs]] <- list(first=redS[rowIndex,(b+1):(b+2)],
-				second=redS[rowIndex+rowAppend,(b+1):(b+2)])
+			coordinatePairs[[numCoordinatePairs]] <- list(first=S[rowIndex,(b+1):(b+2)],
+				second=S[rowIndex+rowAppend,(b+1):(b+2)])
 		}
 	}
 
