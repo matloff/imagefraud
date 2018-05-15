@@ -6,76 +6,89 @@ library(scales)
 library(NMF)
 library(pixmap)
 
+# Call this one!
 faridPca <- function(img, compressMethod)
 # compressMethod is either the string pca or 
 {
 	img <- readJPEG(img)
 
-	redChannel <- img[,,1]
-	greenChannel <- img[,,2]
-	blueChannel <- img[,,3]
+	# Parameters for running the algorithm.
+	parameters <- new.env()
 
-	imgWithBlocks <- img
-	imgWidth <- dim(img)[2]
-	imgHeight <- dim(img)[1]
+	parameters$redChannel <- img[,,1]
+	parameters$greenChannel <- img[,,2]
+	parameters$blueChannel <- img[,,3]
 
-	redSlice <- channelPca(img, 1, compressMethod)
-	greenSlice <- channelPca(img, 2, compressMethod)
-	blueSlice <- channelPca(img, 3, compressMethod)
+	parameters$imgWithBlocks <- img
+	parameters$imgWidth <- dim(img)[2]
+	parameters$imgHeight <- dim(img)[1]
+
+	parameters$compressMethod <- compressMethod
+
+	parameters$imgDim <- dim(img)
+	parameters$N <- parameters$imgDim[1] * parameters$imgDim[2]
+
+	parameters$b <- 64
+
+	parameters$N_b <- (sqrt(parameters$N) - sqrt(parameters$b) + 1)^2
+
+	parameters$e <- 0.01
+	parameters$Q <- 256
+	parameters$N_n <- 100  # number of neighboring rows to search in sorted matrix
+	parameters$N_f <- 128
+	parameters$N_d <- 16
+
+	# for now, set arbitrarily
+	# TODO: change this
+	parameters$N_t <- 8
+
+	parameters$imgWidth <- dim(img)[2]
+	parameters$imgHeight <- dim(img)[1]
+
+	# redSlice <- channelPca(img, 1, parameters)
+	changedImg <- redSlice <- channelPca(img, 1, parameters)
+	# greenSlice <- channelPca(img, 2, parameters)
+	# blueSlice <- channelPca(img, 3, parameters)
 
 	plot.new()
-	plot.window(xlim=c(0,imgWidth), ylim=c(0,imgHeight))
-	imgWithBlocks[,,1] <- redSlice
-	imgWithBlocks[,,2] <- greenSlice
-	imgWithBlocks[,,3] <- blueSlice
+	plot.window(xlim=c(0,parameters$imgWidth), ylim=c(0,parameters$imgHeight))
+	# parameters$imgWithBlocks[,,1] <- redSlice
+	# parameters$imgWithBlocks[,,2] <- greenSlice
+	# parameters$imgWithBlocks[,,3] <- blueSlice
 
 
-	rasterImage(imgWithBlocks, xleft=0, xright =imgWidth, ybottom=0,ytop=imgHeight)
+	# rasterImage(parameters$imgWithBlocks, xleft=0, xright =parameters$imgWidth,
+	rasterImage(changedImg, xleft=0, xright =parameters$imgWidth,
+		ybottom=0,ytop=parameters$imgHeight)
 
 
 }
 
+# Creates 
 compressBlocks <- function()
 {
 
 }
 
-channelPca <- function(img, channelValue, compressMethod)
+# parameters is environment containing all the params for running
+# the algorithm.
+channelPca <- function(img, channelValue, parameters)
 {
 	channel <- img[,,channelValue]
-
-	imgDim <- dim(img)
-	N <- imgDim[1] * imgDim[2]
-
-	b <- 64
-
-	N_b <- (sqrt(N) - sqrt(b) + 1)^2
-
-	e <- 0.01
-	Q <- 256
-	N_n <- 100
-	N_f <- 128
-	N_d <- 16
-
-	# for now, set arbitrarily
-	# TODO: change this
-	N_t <- 8
 
 	# To help the upcoming double for loop.
 	topLeftX <- 1
 	topLeftY <- 1
-	imgWidth <- dim(img)[2]
-	blockWidth <- sqrt(b)
-	numSlidingBlocksPerRow <- imgWidth - blockWidth + 1
-	imgHeight <- dim(img)[1]
-	blockHeight <- sqrt(b)
-	numSlidingBlocksPerCol <- imgHeight - blockHeight + 1
+	blockWidth <- sqrt(parameters$b)
+	numSlidingBlocksPerRow <- parameters$imgWidth - blockWidth + 1
+	blockHeight <- sqrt(parameters$b)
+	numSlidingBlocksPerCol <- parameters$imgHeight - blockHeight + 1
 
 	# Init matrix where each row represents a block as a row vector.
 	# The max size of a row is whatever the max size of N_t is (i.e. b).
 	# Have two extra spots in each row to hold the x and y coordinate of the
 	# top left of the corresponding block (top left of image is (0,0)).
-	blocks <- matrix(0, nrow = N_b, ncol = b + 2)
+	blocks <- matrix(0, nrow = parameters$N_b, ncol = parameters$b + 2)
 
 	blockIndex <- 1
 	for (rowIndex in 1:numSlidingBlocksPerCol)
@@ -87,22 +100,22 @@ channelPca <- function(img, channelValue, compressMethod)
 			block <- channel[rowIndex:(rowIndex+blockHeight-1),
 			                       colIndex:(colIndex+blockWidth-1)]
 			#performs PCA on specified block for one color channel
-			if (compressMethod == "pca")
+			if (parameters$compressMethod == "pca")
 			{
-				blockPca <- prcomp(block, center = FALSE)
+				# blockPca <- prcomp(block, center = FALSE)
 				#compresses PCA results into a vector for specified red block
-				blockCompressed <- as.vector(
-					blockPca$x[,1:N_t] %*% t(blockPca$rotation[,1:N_t]))
+				# blockCompressed <- as.vector(blockPca$x[,1:parameters$N_t])
 			}
-			if (compressMethod == "nmf")
+			if (parameters$compressMethod == "nmf")
 			{
 				blockPca <- nmf(block,2)
 				blockCompressed <- blockPca@fit@W %*% blockPca@fit@H
 			}
 			# each matrix with each row containing a compressed block of the one color channel block
-			blocks[blockIndex,(1:b)] <- as.vector(blockCompressed)
+			# blocks[blockIndex,(1:parameters$b)] <- as.vector(blockCompressed)
+			blocks[blockIndex,(1:parameters$b)] <- as.vector(block)
 			# storing the block's coordinates for easier lookup for the one color channel block
-			blocks[blockIndex,(b+1):(b+2)] <- c(rowIndex,colIndex)
+			blocks[blockIndex,(parameters$b+1):(parameters$b+2)] <- c(rowIndex,colIndex)
 
 			# increasing blockIndex for the matrix 
 			blockIndex <- blockIndex + 1
@@ -117,8 +130,12 @@ channelPca <- function(img, channelValue, compressMethod)
 		}
 	}
 
+	blocks <- prcomp(blocks)$x
+	# browser()
+
 	# sorts the rows in lexographic order for redChannel
-	S <- blocks[do.call(order, lapply(1:(b+2), function(i) blocks[,i])),]
+	S <<- blocks[do.call(order, lapply(1:(parameters$b+2), function(i) blocks[,i])),]
+	parameters <<- parameters
 
 	# Note that the last two coordinates of each row in S are the
 	# coordinates of the block corresponding to that row.
@@ -127,18 +144,22 @@ channelPca <- function(img, channelValue, compressMethod)
 	coordinatePairs <- list()
 
 	numCoordinatePairs <- 0
-	for (rowIndex in 1:(nrow(S)-N_n))
+	for (rowIndex in 1:(nrow(S)-parameters$N_n))
 	{
-		for (rowAppend in 1:(N_n-1))
+		for (rowAppend in 1:(parameters$N_n-1))
 		{
 			numCoordinatePairs <- numCoordinatePairs + 1
 
 			#first is coordinates of block1
 			#second is coordinates of block2
-			coordinatePairs[[numCoordinatePairs]] <- list(first=S[rowIndex,(b+1):(b+2)],
-				second=S[rowIndex+rowAppend,(b+1):(b+2)])
+			# message("rowIndex=", rowIndex, "rowAppend=", rowAppend)
+			coordinatePairs[[numCoordinatePairs]] <- list(first=S[rowIndex,(parameters$b+1):(parameters$b+2)],
+				second=S[rowIndex+rowAppend,(parameters$b+1):(parameters$b+2)])
 		}
 	}
+
+	message("Survived coordinate pairs")
+	# browser()
 
 	offsets <- list()
 	numOffsets <- 0
@@ -158,7 +179,7 @@ channelPca <- function(img, channelValue, compressMethod)
 			offset <- list(0, abs(yi - yj), xi, yi, xj, yj)
 		}
 
-		if (sqrt((offset[[1]])^2 + (offset[[2]])^2) >= N_d) {
+		if (sqrt((offset[[1]])^2 + (offset[[2]])^2) >= parameters$N_d) {
 			# Add the offset.
 			numOffsets <- numOffsets + 1
 			offsets[[numOffsets]] <- offset
@@ -166,6 +187,9 @@ channelPca <- function(img, channelValue, compressMethod)
 	}
 
 	# print(offsets)
+
+	message("Survived coordinate pairs again")
+	# browser()
 
 	frequentOffsets <- list()
 	numFrequentOffsets <- 0
@@ -183,13 +207,7 @@ channelPca <- function(img, channelValue, compressMethod)
 			offsetFrequency <- offsetFrequency + 1
 		} else {
 			# Found new offset.
-			# print("numFrequentOffsets")
-			# print(numFrequentOffsets)
-			# print("previousOffset")
-			# print(previousOffset)
-			# print("frequentOffsets")
-			# print(frequentOffsets)
-			if (offsetFrequency >= N_f) {
+			if (offsetFrequency >= parameters$N_f) {
 				numFrequentOffsets <- numFrequentOffsets + 1
 				frequentOffsets[[numFrequentOffsets]] <- previousOffset
 			}
@@ -215,16 +233,11 @@ channelPca <- function(img, channelValue, compressMethod)
 
 		# browser()
 
-		imgWithBlocks[coordinate1[[1]],coordinate1[[2]],] <- 0
-		imgWithBlocks[coordinate2[[1]],coordinate2[[2]],] <- 0
+		imgWithBlocks[coordinate1[[1]]:(coordinate1[[1]]+blockWidth-1),
+					  coordinate1[[2]]:(coordinate1[[2]]+blockHeight-1),] <- 0  # c(1,1,0)
+		imgWithBlocks[coordinate2[[1]]:(coordinate2[[1]]+blockWidth-1),
+					  coordinate2[[2]]:(coordinate2[[2]]+blockHeight-1),] <- 0  # c(1,1,0)
 	}
-
-	# print(imgWithBlocks)
-	# plot(imgWithBlocks)
-	# plot.new()
-	# plot.window(xlim=c(0,imgWidth), ylim=c(0,imgHeight))
-	#rasterImage(imgWithBlocks, xleft=0, xright =imgWidth, ybottom=0,ytop=imgHeight)
-	# points(imgWithBlocks)
 
 	return(imgWithBlocks[,,channelValue])
 	# TODO: Change it to blocks
