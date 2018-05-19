@@ -3,11 +3,10 @@
 library(EBImage)
 
 
-# next 5 variable definitions (image,3 dims,Q,Nf) will become user inputs to the detection function
 imageIn <- readImage("/Users/robinyancey/desktop/copied.jpg")
 #imageIn <- readJPEG("/Users/robinyancey/desktop/copied.jpg") # can use this too (but b&w and rotated)
 #display(imageIn)
-#imageInCopy <-imageIn
+
 dim3<-3
 dim2<-512
 dim1<-512
