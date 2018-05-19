@@ -15,7 +15,7 @@ dim1<-512
 # Q and Nf varies based on amount/size of copied region
 Q <- 63 #63 JPEG Quality factor: found by trial and error but might be command line arg to print this from image
 Nf <- 110 #110 should print row/column pairs of distances greater than Nf (adjust to print number of copied regions)
-Nd <- 10
+Nd <- 8 #2 minimum offset of matching block (can be as low as 2 for this image) 
 
 #dctCP<-function(imageIn,dim1,dim2,dim3,Nf,Nd=2,Q=63){
 require('dtt')
