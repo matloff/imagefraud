@@ -12,7 +12,7 @@ dim<-3
 
 # Q and Nf varies based on amount/size of copied region
 Q <- 63 #63 JPEG Quality factor: found by trial and error but might be command line arg to print this from image
-Nf <- 115 #110 should print row/column pairs of distances greater than Nf (adjust to print number of copied regions)
+Nf <- 110 #110 should print row/column pairs of distances greater than Nf (adjust to print number of copied regions)
 
 scale <-10 # 10: this DCT function produces very high variance so scale=10 (and variant=4) or NO matches will be found
 boxside <- 16 #16: just like it says in the papers the box size needs to be 16 (or number of matches gets VERY large)
