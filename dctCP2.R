@@ -1,7 +1,6 @@
 library(jpeg)
 library(EBImage)
 library('dtt')
-library('zoo')
 
 # next five variable definitions will become user inputs to the detection function
 imageIn <- readImage("/Users/robinyancey/desktop/copied.jpg")
@@ -13,6 +12,7 @@ dim<-3
 # Q and Nf varies based on amount/size of copied region
 Q <- 63 #63 JPEG Quality factor: found by trial and error but might be command line arg to print this from image
 Nf <- 110 #110 should print row/column pairs of distances greater than Nf (adjust to print number of copied regions)
+Nd <- 8 #1 minimum offset of matching block(can be low as 2 for this image)
 
 scale <-10 # 10: this DCT function produces very high variance so scale=10 (and variant=4) or NO matches will be found
 boxside <- 16 #16: just like it says in the papers the box size needs to be 16 (or number of matches gets VERY large)
@@ -66,7 +66,7 @@ for (i in 1:(size-1)){
   if (all(testdct[i,] == testdct[(i+1),]) ){
     distancePair[numFound,1] <- abs(dctLocations[i,1] - dctLocations[(i+1),1]) # row offset
     distancePair[numFound,2] <- abs(dctLocations[i,2] - dctLocations[(i+1),2]) # column offset
-    if (sqrt(distancePair[numFound,1]^2+distancePair[numFound,1]^2)>2){
+    if (sqrt(distancePair[numFound,1]^2+distancePair[numFound,1]^2)>Nd){
       pairLoc1[numFound,] <- dctLocations[i,]
       pairLoc2[numFound,] <- dctLocations[(i+1),] # increment matrix counting offset frequencies:
       pairFrequencies[distancePair[numFound,1], distancePair[numFound,2]] <- pairFrequencies[distancePair[numFound,1], distancePair[numFound,2]] + 1
