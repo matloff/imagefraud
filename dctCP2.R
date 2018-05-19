@@ -1,12 +1,13 @@
 library(jpeg)
 library(EBImage)
-library('dtt')
+#library('dtt')
 
-# next five variable definitions will become user inputs to the detection function
+
+# next 7 variable definitions (image,3 dims,Q,Nf) will become user inputs to the detection function
 imageIn <- readImage("/Users/robinyancey/desktop/copied.jpg")
 #imageIn <- readJPEG("/Users/robinyancey/desktop/copied.jpg") # can use this too (but b&w and rotated)
 #display(imageIn)
-imageInCopy <-imageIn
+#imageInCopy <-imageIn
 dim3<-3
 dim2<-512
 dim1<-512
@@ -14,11 +15,16 @@ dim1<-512
 # Q and Nf varies based on amount/size of copied region
 Q <- 63 #63 JPEG Quality factor: found by trial and error but might be command line arg to print this from image
 Nf <- 110 #110 should print row/column pairs of distances greater than Nf (adjust to print number of copied regions)
-Nd <- 8 #1 minimum offset of matching block(can be low as 2 for this image)
+Nd <- 10
 
-scale <-10 # 10: this DCT function produces very high variance so scale=10 (and variant=4) or NO matches will be found
+#dctCP<-function(imageIn,dim1,dim2,dim3,Nf,Nd=2,Q=63){
+require('dtt')
+  
+scale <-10 #10: this DCT function produces very high variance so scale=10 and variant=4 (or NO matches will be found)
 boxside <- 16 #16: just like it says in the papers the box size needs to be 16 (or number of matches gets VERY large)
 
+imageInCopy <-imageIn
+# add "if dim3" here
 # normal way to convert to black and white
 red.weigth   <- .2989; green.weigth <- .587; blue.weigth  <- 0.114
 imageIn <- red.weigth * imageData(imageIn)[,,1] + green.weigth * imageData(imageIn)[,,2] + blue.weigth  * imageData(imageIn)[,,3]
@@ -82,15 +88,17 @@ freqPairs <- which(pairFrequencies > Nf, arr.ind=TRUE)
 print(freqPairs)
 print(system.time(
 
-for (ii in 1:(numFound-1)){
-  for (jj in 1:nrow(freqPairs)){
-    if (distancePair[ii,] == freqPairs[jj,]){
-    imageInCopy[pairLoc1[ii,1]:(pairLoc1[ii,1]+boxside - 1), pairLoc1[ii,2]:(pairLoc1[ii,2]+boxside - 1),1:dim3] = 255
-    imageInCopy[pairLoc2[ii,1]:(pairLoc2[ii,1]+boxside - 1), pairLoc2[ii,2]:(pairLoc2[ii,2]+boxside - 1),1:dim3] = 255
+for (i in 1:(numFound-1)){
+  for (j in 1:nrow(freqPairs)){
+    if (distancePair[i,] == freqPairs[j,]){
+    imageInCopy[pairLoc1[i,1]:(pairLoc1[i,1]+boxside - 1), pairLoc1[i,2]:(pairLoc1[i,2]+boxside - 1),1:dim3] = 255
+    imageInCopy[pairLoc2[i,1]:(pairLoc2[i,1]+boxside - 1), pairLoc2[i,2]:(pairLoc2[i,2]+boxside - 1),1:dim3] = 255
     }
   }
 }
 ))
 # may need to rerun this line to show image
-display(imageInCopy)
+#}
 # A & A: if you dont want to diplay using EBimage package function just white-out the imageIn not copy and display that in B&W
+#dctCP(imageIn,dim1,dim2,dim3,Nf,Nd,Q)
+display(imageInCopy)
