@@ -7,7 +7,9 @@ imageIn <- readImage("/Users/robinyancey/desktop/copied.jpg")
 #imageIn <- readJPEG("/Users/robinyancey/desktop/copied.jpg") # can use this too (but b&w and rotated)
 #display(imageIn)
 imageInCopy <-imageIn
-dim<-3
+dim3<-3
+dim2<-512
+dim1<-512
 
 # Q and Nf varies based on amount/size of copied region
 Q <- 63 #63 JPEG Quality factor: found by trial and error but might be command line arg to print this from image
@@ -20,7 +22,7 @@ boxside <- 16 #16: just like it says in the papers the box size needs to be 16 (
 # normal way to convert to black and white
 red.weigth   <- .2989; green.weigth <- .587; blue.weigth  <- 0.114
 imageIn <- red.weigth * imageData(imageIn)[,,1] + green.weigth * imageData(imageIn)[,,2] + blue.weigth  * imageData(imageIn)[,,3]
-imageIn <- round(255*imageIn[1:512,1:512])
+imageIn <- round(255*imageIn[1:dim1,1:dim2])
 
 
 T <- matrix(99,16,16) # (16-by-16) JPEG Chrominance Quantization Matrix (Luminance table didn’t work w/ any Q factors I tested)
