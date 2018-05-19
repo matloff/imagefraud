@@ -85,8 +85,8 @@ print(system.time(
 for (ii in 1:(numFound-1)){
   for (jj in 1:nrow(freqPairs)){
     if (distancePair[ii,] == freqPairs[jj,]){
-    imageInCopy[pairLoc1[ii,1]:(pairLoc1[ii,1]+boxside - 1), pairLoc1[ii,2]:(pairLoc1[ii,2]+boxside - 1),1:dim] = 255
-    imageInCopy[pairLoc2[ii,1]:(pairLoc2[ii,1]+boxside - 1), pairLoc2[ii,2]:(pairLoc2[ii,2]+boxside - 1),1:dim] = 255
+    imageInCopy[pairLoc1[ii,1]:(pairLoc1[ii,1]+boxside - 1), pairLoc1[ii,2]:(pairLoc1[ii,2]+boxside - 1),1:dim3] = 255
+    imageInCopy[pairLoc2[ii,1]:(pairLoc2[ii,1]+boxside - 1), pairLoc2[ii,2]:(pairLoc2[ii,2]+boxside - 1),1:dim3] = 255
     }
   }
 }
