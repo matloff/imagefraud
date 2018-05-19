@@ -1,9 +1,9 @@
-library(jpeg)
+#library(jpeg)
+# or better to use use:
 library(EBImage)
-#library('dtt')
 
 
-# next 7 variable definitions (image,3 dims,Q,Nf) will become user inputs to the detection function
+# next 5 variable definitions (image,3 dims,Q,Nf) will become user inputs to the detection function
 imageIn <- readImage("/Users/robinyancey/desktop/copied.jpg")
 #imageIn <- readJPEG("/Users/robinyancey/desktop/copied.jpg") # can use this too (but b&w and rotated)
 #display(imageIn)
@@ -17,7 +17,8 @@ Q <- 63 #63 JPEG Quality factor: found by trial and error but might be command l
 Nf <- 110 #110 should print row/column pairs of distances greater than Nf (adjust to print number of copied regions)
 Nd <- 8 #2 minimum offset of matching block (can be as low as 2 for this image) 
 
-#dctCP<-function(imageIn,dim1,dim2,dim3,Nf,Nd=2,Q=63){
+
+dctCP<-function(imageIn,dim1,dim2,dim3,Nf,Nd=2,Q=63){
 require('dtt')
   
 scale <-10 #10: this DCT function produces very high variance so scale=10 and variant=4 (or NO matches will be found)
@@ -97,8 +98,10 @@ for (i in 1:(numFound-1)){
   }
 }
 ))
+imageInCopy
 # may need to rerun this line to show image
-#}
+}
 # A & A: if you dont want to diplay using EBimage package function just white-out the imageIn not copy and display that in B&W
-#dctCP(imageIn,dim1,dim2,dim3,Nf,Nd,Q)
+imageInCopy<-dctCP(imageIn,dim1,dim2,dim3,Nf,Nd,Q)
 display(imageInCopy)
+
