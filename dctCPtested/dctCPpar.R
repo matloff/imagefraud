@@ -1,0 +1,131 @@
+library(EBImage)
+
+imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
+
+#display(imageIn)
+# image dimensions
+dim3<-3
+dim2<-512
+dim1<-512
+
+# Q and Nf varies based on amount/size of copied region
+Q <- 47 #JPEG Quality factor: found by trial and error but might be command line arg to print this from image
+Nf <- 30 #should print row/column pairs of distances greater than Nf (adjust to print pairs = number of copied regions)
+Nd <- 16 #this is the minimum offset of matching block
+
+c <- 0 #color (0-255) of copied regions in output image
+
+dctCP<-function(imageIn,c,dim1,dim2,dim3,Nf,Nd=2,Q=50){
+  require('dtt')
+  # require('parallel')
+  # require('partools')
+  # 
+  scale <-10 #10: this DCT function produces very high variance so scale=10 and variant=4 (or NO matches will be found)
+  boxside <- 16 #16: just like it says in the papers the box size needs to be 16 (or number of matches gets VERY large)
+  
+  imageInCopy <-imageIn
+  # add "if dim3" here
+  # normal way to convert to black and white
+  red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
+  imageIn <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]
+  imageIn <- round(255*imageIn[1:dim1,1:dim2])
+  
+  # (16-by-16) JPEG Chrominance Quantization Matrix (Luminance table didn’t work w/ any Q factors I tested)
+  T <- matrix(99,boxside,boxside) 
+  T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)
+  
+  # IJG scaling:
+  if (Q>=50){
+    S <- 200-(2*Q)}
+  if (Q<50){S <- 5000/Q}
+  T <- round((((T*S)+50)/100))
+  
+  
+  dctMatrix <- function(imageIn){
+  imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
+  # note that images are read in differently (depending on function/package) but image is made square so this for now:
+  width <- nrow(imageIn)
+  height<- ncol(imageIn)
+  # in parallel we will miss boxside - 1 blocks per worker in current form
+  size <- (width-boxside+1) * (height-boxside+1) 
+  testdct <- matrix(0, nrow=size, ncol=((boxside^2) + 2) ) # dct with loactions
+  
+  k <- 1
+  print(system.time(
+    for (i in 1:(width-boxside+1)){
+      for (j in 1:(height-boxside+1)){
+        endw <- i+(boxside-1)
+        endh <- j+(boxside-1)
+        block <- round((mvdtt(imageIn[i:endw,j:endh], type='dct', variant=4)/scale)/T)
+        block <- t(as.vector(block))
+        testdct[k,] <- c(block, i, j) # add (cls[[2]]$rank-1)*height to i (but forgot how to get rank within)
+        k <- k+1
+      }
+    }
+  ))
+  testdct
+  } 
+  # width <- nrow(imageIn)
+  # height<- ncol(imageIn)
+  # size <- (width-boxside+1) * (height-boxside+1) # rewrite size since was divided on cls
+  # cls <-makeCluster(2)
+  # clusterExport(cls,'dctMatrix');clusterExport(cls,'boxside');clusterExport(cls,'T');clusterExport(cls,'scale')
+  # clusterEvalQ(cls,require('dtt'))
+  # distribsplit(cls, 'imageIn')
+  # testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))
+  # going to need to correct i, j locations
+  # then list apply rbind all testdct chunks to make new large testdct
+  # t[[2]][,((boxside^2) + 1)] <- t[[2]][,((boxside^2) + 1)] + (height/2)
+  # testdct<-rbind(testdctC[[1]],testdctC[[2]])
+  testdct <- dctMatrix(imageIn)
+  
+  # sort lexographically or by all columns (accept location columns)
+  testdct <- testdct[do.call(order, lapply(1:(boxside^2), function(i) testdct[,i])),]
+  
+  dctLocations <- testdct[,((boxside^2)+1):((boxside^2)+2)]
+  testdct <- testdct[,1:(boxside^2)]
+  
+  
+  numFound <- 1 # counts matching rows 
+  distancePair <- matrix(0, size, 2) # just make biggest possible
+  pairLoc1 <- matrix(0, size, 2) # these hold the just box locations of pairs with non-adjacent offset
+  pairLoc2 <- matrix(0, size, 2) 
+  pairFrequencies <- matrix(0, max(height, width), max(height, width))
+  
+  print(system.time(
+    for (i in 1:(size-1)){
+      if (all(testdct[i,] == testdct[(i+1),])){
+        distancePair[numFound,1] <- abs(dctLocations[i,1] - dctLocations[(i+1),1]) # row offset
+        distancePair[numFound,2] <- abs(dctLocations[i,2] - dctLocations[(i+1),2]) # column offset
+        if (sqrt(distancePair[numFound,1]^2+distancePair[numFound,1]^2)>Nd){
+          pairLoc1[numFound,] <- dctLocations[i,]
+          pairLoc2[numFound,] <- dctLocations[(i+1),] # increment matrix counting offset frequencies:
+          pairFrequencies[distancePair[numFound,1], distancePair[numFound,2]] <- pairFrequencies[distancePair[numFound,1], distancePair[numFound,2]] + 1
+          numFound <- numFound + 1
+        }
+      }
+    } 
+  ))
+  # print the frequencies above the threshold by running line by line in function:
+  # "which(pairFrequencies > Nf, arr.ind=TRUE)"
+  freqPairs <- which(pairFrequencies > Nf, arr.ind=TRUE) 
+  if (nrow(freqPairs)>=1){
+    print(freqPairs)}
+  
+  print(system.time(
+    
+    for (i in 1:(numFound-1)){
+      for (j in 1:nrow(freqPairs)){
+        if (distancePair[i,] == freqPairs[j,]){
+          imageInCopy[pairLoc1[i,1]:(pairLoc1[i,1]+boxside - 1), pairLoc1[i,2]:(pairLoc1[i,2]+boxside - 1),1:dim3] = c
+          imageInCopy[pairLoc2[i,1]:(pairLoc2[i,1]+boxside - 1), pairLoc2[i,2]:(pairLoc2[i,2]+boxside - 1),1:dim3] = c
+        }
+      }
+    }
+  ))
+  imageInCopy
+}
+
+imageInCopy<-dctCP(imageIn,c,dim1,dim2,dim3,Nf,Nd,Q)
+# need to rerun this line to refresh image:
+display(imageInCopy)
