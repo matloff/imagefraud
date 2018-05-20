@@ -27,15 +27,11 @@ red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
 imageIn <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]
 imageIn <- round(255*imageIn[1:dim1,1:dim2])
 
-  # T2 <- c(16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55,
-  # 14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62,
-  # 18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92,
-  # 49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99)
-  # temp<-t(matrix(T2,8,8))
-  # T2<-cbind(rbind(temp,temp),rbind(temp,temp))
 
 T <- matrix(99,boxside,boxside) # (16-by-16) JPEG Chrominance Quantization Matrix (Luminance table didn’t work w/ any Q factors I tested)
 T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)
+  
+# IJG scaling:
 if (Q>=50){
 S <- 200-(2*Q)}
 if (Q<50){S <- 5000/Q}
