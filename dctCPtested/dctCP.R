@@ -15,7 +15,7 @@ Nf <- 30 #110 should print row/column pairs of distances greater than Nf (adjust
 Nd <- 10 #2 minimum offset of matching block (can be as low as 2 for this image) 
 
 
-dctCP<-function(imageIn,dim1,dim2,dim3,Nf,Nd=2,Q=63){
+dctCP<-function(imageIn,dim1,dim2,dim3,Nf,Nd=2,Q=50){
 require('dtt')
   
 scale <-10 #10: this DCT function produces very high variance so scale=10 and variant=4 (or NO matches will be found)
