@@ -2,7 +2,7 @@ library(EBImage)
 
 imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
 
-#display(imageIn)
+# display(imageIn)
 # image dimensions
 dim3<-3
 dim2<-512
@@ -15,10 +15,11 @@ Nd <- 16 #this is the minimum offset of matching block
 
 c <- 0 #color (0-255) of copied regions in output image
 
-dctCP<-function(imageIn,c,dim1,dim2,dim3,Nf,Nd=2,Q=50){
+par <- F # if true then image is split in half for parallel dct matrix computation, if false it runs in serial (slower)
+# note: parallel version requires packages: partools
+
+dctCP<-function(imageIn,c,par,dim1,dim2,dim3,Nf,Nd=2,Q=50){
   require('dtt')
-  # require('parallel')
-  # require('partools')
   # 
   scale <-10 #10: this DCT function produces very high variance so scale=10 and variant=4 (or NO matches will be found)
   boxside <- 16 #16: just like it says in the papers the box size needs to be 16 (or number of matches gets VERY large)
@@ -43,7 +44,7 @@ dctCP<-function(imageIn,c,dim1,dim2,dim3,Nf,Nd=2,Q=50){
   
   dctMatrix <- function(imageIn){
   imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
-  # note that images are read in differently (depending on function/package) but image is made square so this for now:
+  # note that images are read in differently (depending on function/package)
   width <- nrow(imageIn)
   height<- ncol(imageIn)
   # in parallel we will miss boxside - 1 blocks per worker in current form
@@ -51,33 +52,42 @@ dctCP<-function(imageIn,c,dim1,dim2,dim3,Nf,Nd=2,Q=50){
   testdct <- matrix(0, nrow=size, ncol=((boxside^2) + 2) ) # dct with loactions
   
   k <- 1
-  print(system.time(
+
     for (i in 1:(width-boxside+1)){
       for (j in 1:(height-boxside+1)){
         endw <- i+(boxside-1)
         endh <- j+(boxside-1)
         block <- round((mvdtt(imageIn[i:endw,j:endh], type='dct', variant=4)/scale)/T)
         block <- t(as.vector(block))
-        testdct[k,] <- c(block, i, j) # add (cls[[2]]$rank-1)*height to i (but forgot how to get rank within)
+        testdct[k,] <- c(block, i, j)
         k <- k+1
       }
     }
-  ))
+
   testdct
   } 
-  # width <- nrow(imageIn)
-  # height<- ncol(imageIn)
-  # size <- (width-boxside+1) * (height-boxside+1) # rewrite size since was divided on cls
-  # cls <-makeCluster(2)
-  # clusterExport(cls,'dctMatrix');clusterExport(cls,'boxside');clusterExport(cls,'T');clusterExport(cls,'scale')
-  # clusterEvalQ(cls,require('dtt'))
-  # distribsplit(cls, 'imageIn')
-  # testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))
-  # going to need to correct i, j locations
-  # then list apply rbind all testdct chunks to make new large testdct
-  # t[[2]][,((boxside^2) + 1)] <- t[[2]][,((boxside^2) + 1)] + (height/2)
-  # testdct<-rbind(testdctC[[1]],testdctC[[2]])
-  testdct <- dctMatrix(imageIn)
+  ### Parallel:
+  if (par){
+  require('parallel')
+  require('partools')
+  cls <-makeCluster(2)
+  clusterExport(cls,'dctMatrix');clusterExport(cls,'boxside');clusterExport(cls,'T');clusterExport(cls,'scale')
+  clusterEvalQ(cls,require('dtt'))
+  distribsplit(cls, 'imageIn')
+  print(system.time(testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))))
+  
+  width <- nrow(imageIn)
+  height<- ncol(imageIn)
+  # rewrite size since was divided on cls (shorter since misses rows of overlapping boxes)
+  size <- dim(testdct)[1]
+  # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
+  testdctC[[2]][,((boxside^2) + 1)] <- testdctC[[2]][,((boxside^2) + 1)] + (height/2) 
+  # combine all testdct chunks to make new large testdct
+  testdct<-rbind(testdctC[[1]],testdctC[[2]])}
+  
+  ### Serial:
+  if (!par){
+  print(system.time(testdct <- dctMatrix(imageIn)))}
   
   # sort lexographically or by all columns (accept location columns)
   testdct <- testdct[do.call(order, lapply(1:(boxside^2), function(i) testdct[,i])),]
@@ -126,6 +136,6 @@ dctCP<-function(imageIn,c,dim1,dim2,dim3,Nf,Nd=2,Q=50){
   imageInCopy
 }
 
-imageInCopy<-dctCP(imageIn,c,dim1,dim2,dim3,Nf,Nd,Q)
+imageInCopy<-dctCP(imageIn,c,par,dim1,dim2,dim3,Nf,Nd,Q)
 # need to rerun this line to refresh image:
 display(imageInCopy)
