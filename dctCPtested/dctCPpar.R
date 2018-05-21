@@ -17,7 +17,6 @@ par <- T # if true then image is split in half for parallel dct matrix computati
 
 
 dctCP<-function(imageIn,c,par,dim3,Nf,Nd=2,Q=50){
-  #require('dtt')
   # these will be made constants after more tests
   scale <-10 # 10: this DCT function produces very high variance so scale=10 and variant=4 (or NO matches will be found)
   boxside <- 16 # 16: just like it says in the papers the box size needs to be 16 (or number of matches gets VERY large)
@@ -118,13 +117,12 @@ dctCP<-function(imageIn,c,par,dim3,Nf,Nd=2,Q=50){
     } 
   ))
   # print the frequencies above the threshold by running line by line in function:
-  # "which(pairFrequencies > Nf, arr.ind=TRUE)"
+  # "which(pairFrequencies > Nf, arr.ind=TRUE)" and changing Nf to check # pairs
   freqPairs <- which(pairFrequencies > Nf, arr.ind=TRUE) 
   if (nrow(freqPairs)>=1){
     print(freqPairs)}
   
-  print(system.time(
-    
+  print(system.time(    
     for (i in 1:(numFound-1)){
       for (j in 1:nrow(freqPairs)){
         if (distancePair[i,] == freqPairs[j,]){
