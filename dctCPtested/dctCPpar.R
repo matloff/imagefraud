@@ -1,22 +1,3 @@
-library(EBImage)
-
-imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
-
-# display(imageIn)
-# image dimensions
-dim3<-3
-dim2<-512
-dim1<-512
-
-# Q and Nf varies based on amount/size of copied region
-Q <- 47 #JPEG Quality factor: found by trial and error but might be command line arg to print this from image
-Nf <- 30 #should print row/column pairs of distances greater than Nf (adjust to print pairs = number of copied regions)
-Nd <- 16 #this is the minimum offset of matching block
-
-c <- 0 #color (0-255) of copied regions in output image
-
-par <- F # if true then image is split in half for parallel dct matrix computation, if false it runs in serial (slower)
-# note: parallel version requires packages: partools
 
 dctCP<-function(imageIn,c,par,dim1,dim2,dim3,Nf,Nd=2,Q=50){
   require('dtt')
@@ -26,10 +7,11 @@ dctCP<-function(imageIn,c,par,dim1,dim2,dim3,Nf,Nd=2,Q=50){
   
   imageInCopy <-imageIn
   # add "if dim3" here
-  # normal way to convert to black and white
-  red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
-  imageIn <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]
-  imageIn <- round(255*imageIn[1:dim1,1:dim2])
+  if (dim3 == 3){
+    # normal way to convert to black and white
+    red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
+    imageIn <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]}
+    imageIn <- round(255*imageIn[1:dim1,1:dim2])
   
   # (16-by-16) JPEG Chrominance Quantization Matrix (Luminance table didn’t work w/ any Q factors I tested)
   T <- matrix(99,boxside,boxside) 
@@ -41,18 +23,18 @@ dctCP<-function(imageIn,c,par,dim1,dim2,dim3,Nf,Nd=2,Q=50){
   if (Q<50){S <- 5000/Q}
   T <- round((((T*S)+50)/100))
   
-  
   dctMatrix <- function(imageIn){
-  imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
-  # note that images are read in differently (depending on function/package)
-  width <- nrow(imageIn)
-  height<- ncol(imageIn)
-  # in parallel we will miss boxside - 1 blocks per worker in current form
-  size <- (width-boxside+1) * (height-boxside+1) 
-  testdct <- matrix(0, nrow=size, ncol=((boxside^2) + 2) ) # dct with loactions
-  
-  k <- 1
-
+    boxside <- 16
+    imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
+    # note that images are read in differently (depending on function/package)
+    width <- nrow(imageIn)
+    height<- ncol(imageIn)
+    # in parallel we will miss boxside - 1 blocks per worker in current form
+    size <- (width-boxside+1) * (height-boxside+1) 
+    testdct <- matrix(0, nrow=size, ncol=((boxside^2) + 2) ) # dct with loactions
+    
+    k <- 1
+    
     for (i in 1:(width-boxside+1)){
       for (j in 1:(height-boxside+1)){
         endw <- i+(boxside-1)
@@ -63,31 +45,35 @@ dctCP<-function(imageIn,c,par,dim1,dim2,dim3,Nf,Nd=2,Q=50){
         k <- k+1
       }
     }
-
-  testdct
+    testdct
   } 
-  ### Parallel:
-  if (par){
-  require('parallel')
-  require('partools')
-  cls <-makeCluster(2)
-  clusterExport(cls,'dctMatrix');clusterExport(cls,'boxside');clusterExport(cls,'T');clusterExport(cls,'scale')
-  clusterEvalQ(cls,require('dtt'))
-  distribsplit(cls, 'imageIn')
-  print(system.time(testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))))
+  
   
   width <- nrow(imageIn)
   height<- ncol(imageIn)
-  # rewrite size since was divided on cls (shorter since misses rows of overlapping boxes)
-  size <- dim(testdct)[1]
-  # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
-  testdctC[[2]][,((boxside^2) + 1)] <- testdctC[[2]][,((boxside^2) + 1)] + (height/2) 
-  # combine all testdct chunks to make new large testdct
-  testdct<-rbind(testdctC[[1]],testdctC[[2]])}
+  
+  ### Parallel:
+  if (par){
+    require('parallel')
+    require('partools')
+    cls <-makeCluster(2)
+    clusterExport(cls,'dctMatrix', envir=environment())
+    clusterExport(cls, varlist=c("T", "scale"), envir=environment())
+    clusterEvalQ(cls, require('dtt'))
+    distribsplit(cls, 'imageIn')
+    print(system.time(testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))))
+    
+    # rewrite size since was divided on cls (shorter since misses rows of overlapping boxes)
+    # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
+    testdctC[[2]][,((boxside^2) + 1)] <- testdctC[[2]][,((boxside^2) + 1)] + (height/2) 
+    # combine all testdct chunks to make new large testdct
+    testdct<-rbind(testdctC[[1]],testdctC[[2]])
+    size <- dim(testdct)[1]
+    }
   
   ### Serial:
   if (!par){
-  print(system.time(testdct <- dctMatrix(imageIn)))}
+    print(system.time(testdct <- dctMatrix(imageIn)))}
   
   # sort lexographically or by all columns (accept location columns)
   testdct <- testdct[do.call(order, lapply(1:(boxside^2), function(i) testdct[,i])),]
@@ -136,6 +122,26 @@ dctCP<-function(imageIn,c,par,dim1,dim2,dim3,Nf,Nd=2,Q=50){
   imageInCopy
 }
 
+
+library(EBImage)
+
+imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
+
+# display(imageIn)
+# image dimensions
+dim3<-3
+dim2<-512
+dim1<-512
+
+# Q and Nf varies based on amount/size of copied region
+Q <- 47 #JPEG Quality factor: found by trial and error but might be command line arg to print this from image
+Nf <- 30 #should print row/column pairs of distances greater than Nf (adjust to print # pairs = # copied regions)
+Nd <- 16 #this is the minimum offset distance of matching block
+
+c <- 0 #color (0-255) of copied regions in output image
+
+par <- T # if true then image is split in half for parallel dct matrix computation, if false it runs in serial (slower)
+# note: parallel version requires packages: partools
 imageInCopy<-dctCP(imageIn,c,par,dim1,dim2,dim3,Nf,Nd,Q)
 # need to rerun this line to refresh image:
 display(imageInCopy)
