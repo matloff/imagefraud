@@ -14,8 +14,8 @@ Nd <- 8 # minimum offset distance of the matching block: increase as much as pos
 # user choices
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-par <- 1 # if true then image is split in chunks for parallel dct matrix computation, if false it runs in serial (slower)
-# note: parallel version requires packages: partools (for 512x512 image: 150 seconds if par=T, 500 seconds if par=F)
+par <- 8 # if 2,4, or 8 then image is split in chunks for parallel dct matrix computation, if false it runs in serial (slower)
+# note: parallel version requires packages: partools (for 512x512 image: 120 seconds if par=8, 500 seconds if par=F)
 
 
 dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
@@ -71,24 +71,21 @@ dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
   } 
   
   ### Parallel:
-  if (par==1){
+  if (par>0){
     require('partools') 
     require('dtt')
-    #cls <-makeCluster(2)
-    cls <-makeCluster(4)
+    cls <-makeCluster(par)
     clusterExport(cls,'dctMatrix', envir=environment())
     clusterExport(cls, varlist=c("T", "scale"), envir=environment())
     clusterEvalQ(cls, require('dtt'))
     distribsplit(cls, 'imageIn')
     testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))
     # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
-    #testdctC[[2]][,((boxside^2) + 1)] <- testdctC[[2]][,((boxside^2) + 1)] + (height/2) 
-    testdctC[[2]][,((boxside^2) + 1)] <- testdctC[[2]][,((boxside^2) + 1)] + (height/4)
-    testdctC[[3]][,((boxside^2) + 1)] <- testdctC[[3]][,((boxside^2) + 1)] + 2*(height/4)
-    testdctC[[4]][,((boxside^2) + 1)] <- testdctC[[4]][,((boxside^2) + 1)] + 3*(height/4)
-    # combine all testdct chunks to make new large testdct
-    #testdct<-rbind(testdctC[[1]],testdctC[[2]])
-    testdct<-rbind(testdctC[[1]],testdctC[[2]],testdctC[[3]],testdctC[[4]])
+    for (i in 2:length(cls)){ 
+      testdctC[[i]][,((boxside^2) + 1)] <- testdctC[[i]][,((boxside^2) + 1)] + (i-1)*(height/length(cls)) 
+    }
+    # combine all testdctC chunks to make new large testdct
+    testdct<-do.call('rbind',testdctC) 
     }
   
   ### Serial:
