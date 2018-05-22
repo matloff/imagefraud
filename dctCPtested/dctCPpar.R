@@ -14,8 +14,8 @@ Nd <- 8 # minimum offset distance of the matching block: increase as much as pos
 # user choices
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-par <- 1 # if true then image is split in half for parallel dct matrix computation, if false it runs in serial (slower)
-# note: parallel version requires packages: partools
+par <- 1 # if true then image is split in chunks for parallel dct matrix computation, if false it runs in serial (slower)
+# note: parallel version requires packages: partools (for 512x512 image: 150 seconds if par=T, 500 seconds if par=F)
 
 
 dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
@@ -27,8 +27,8 @@ dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
   width <- nrow(imageIn) 
   height<- ncol(imageIn)
   
-  imageInCopy <-imageIn
-  # add "if dim3" here
+  imageInCopy <-imageIn #we want to work witha b/w image
+  
   if (dim3 == 3){
     # standard way to convert to black and white
     red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
@@ -74,28 +74,31 @@ dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
   if (par==1){
     require('partools') 
     require('dtt')
-    cls <-makeCluster(2)
+    #cls <-makeCluster(2)
+    cls <-makeCluster(4)
     clusterExport(cls,'dctMatrix', envir=environment())
     clusterExport(cls, varlist=c("T", "scale"), envir=environment())
     clusterEvalQ(cls, require('dtt'))
     distribsplit(cls, 'imageIn')
     testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))
     # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
-    testdctC[[2]][,((boxside^2) + 1)] <- testdctC[[2]][,((boxside^2) + 1)] + (height/2) 
+    #testdctC[[2]][,((boxside^2) + 1)] <- testdctC[[2]][,((boxside^2) + 1)] + (height/2) 
+    testdctC[[2]][,((boxside^2) + 1)] <- testdctC[[2]][,((boxside^2) + 1)] + (height/4)
+    testdctC[[3]][,((boxside^2) + 1)] <- testdctC[[3]][,((boxside^2) + 1)] + 2*(height/4)
+    testdctC[[4]][,((boxside^2) + 1)] <- testdctC[[4]][,((boxside^2) + 1)] + 3*(height/4)
     # combine all testdct chunks to make new large testdct
-    testdct<-rbind(testdctC[[1]],testdctC[[2]])
-    # rewrite size since was divided on cls (shorter since misses rows of overlapping boxes)
-    size <- dim(testdct)[1]
+    #testdct<-rbind(testdctC[[1]],testdctC[[2]])
+    testdct<-rbind(testdctC[[1]],testdctC[[2]],testdctC[[3]],testdctC[[4]])
     }
   
   ### Serial:
   if (par==0){
     testdct <- dctMatrix(imageIn)}
-    
+  
   # rewrite size since was divided on cls (shorter since misses rows of overlapping boxes)
   size <- dim(testdct)[1]
   
-  # sort lexographically or by all columns (accept location columns)
+  # sort lexographically by all columns (accept location columns)
   # Dr. Matloff note: this is not taking any time (dctMatrix() takes all the time)
   testdct <- testdct[do.call(order, lapply(1:(boxside^2), function(i) testdct[,i])),]
   
@@ -106,8 +109,7 @@ dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
   distancePair <- matrix(0, size, 2) # just make biggest possible
   pairLoc1 <- matrix(0, size, 2) # these hold the just box locations of pairs with > Nd offset
   pairLoc2 <- matrix(0, size, 2) 
-  pairFrequencies <- matrix(0, max(height, width), max(height, width))
-  
+  pairFrequencies <- matrix(0, width, height)
     for (i in 1:(size-1)){
       if (all(testdct[i,] == testdct[(i+1),])){
         distancePair[numFound,1] <- abs(dctLocations[i,1] - dctLocations[(i+1),1]) # row offset
@@ -143,4 +145,3 @@ dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
 print(system.time(imageInCopy<-dctCP(imageIn,c,par,dim3,Nf,Nd,Q)))
 # need to rerun this line to refresh image:
 display(imageInCopy)
-
