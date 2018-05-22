@@ -14,7 +14,7 @@ Nd <- 8 # minimum offset distance of the matching block: increase as much as pos
 # user choices
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-par <- 0 # if true then image is split in half for parallel dct matrix computation, if false it runs in serial (slower)
+par <- 1 # if true then image is split in half for parallel dct matrix computation, if false it runs in serial (slower)
 # note: parallel version requires packages: partools
 
 
@@ -91,6 +91,9 @@ dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
   ### Serial:
   if (par==0){
     testdct <- dctMatrix(imageIn)}
+    
+  # rewrite size since was divided on cls (shorter since misses rows of overlapping boxes)
+  size <- dim(testdct)[1]
   
   # sort lexographically or by all columns (accept location columns)
   # Dr. Matloff note: this is not taking any time (dctMatrix() takes all the time)
