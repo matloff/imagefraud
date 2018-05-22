@@ -14,9 +14,9 @@ Nd <- 8 # minimum offset distance of the matching block: increase as much as pos
 # user choices
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-par <- 8 # if 2,4, or 8 then image is split in chunks for parallel dct matrix computation, if false it runs in serial (slower)
-# note: parallel version requires packages: partools (for 512x512 image: 120 seconds if par=8, 500 seconds if par=F)
-
+par <- 16 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial
+# for 512x512 image: 85 seconds if par=16, 500 seconds if par=0
+# note: parallel version requires partools package 
 
 dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
   # these should be made constants after more tests
@@ -142,3 +142,4 @@ dctCP<-function(imageIn,c=0,par,dim3=3,Nf=10,Nd=2,Q=50){
 print(system.time(imageInCopy<-dctCP(imageIn,c,par,dim3,Nf,Nd,Q)))
 # need to rerun this line to refresh image:
 display(imageInCopy)
+
