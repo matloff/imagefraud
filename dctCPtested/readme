@@ -1,7 +1,9 @@
 
 001_F.jpg source: cant find it :( (was a good one)
 
-Use Q <- 49, Nf <- 4, Nd<-128 
+Use Q <- 49, Nf <- 4, Nd <- 128  (for chrominence)
+
+Use Q <- 87, Nf <- 30, Nd <- 128 (for luminence)
 
 copied.jpg source: https://www5.cs.fau.de/research/data/image-manipulation/
 
