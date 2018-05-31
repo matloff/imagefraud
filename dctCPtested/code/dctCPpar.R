@@ -48,7 +48,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,T=8){
   
   if  (T == 8){
   boxside <- 8
-  # JPEG Luminence Quantization Matrix (use boxside of 8 with Nf of 30, Nd =128, Q = 95) (40 with 90 on desktop) 87 with 30 best!
+  # JPEG Luminence Quantization Matrix 
   T2 <- c(16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55,
   14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62,
   18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92,
