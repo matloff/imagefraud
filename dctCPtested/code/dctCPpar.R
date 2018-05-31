@@ -4,46 +4,59 @@ imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
 
 #display(imageIn)
 
-Q <- 49 # first find the JPEG Quality factor: can be found by trial and error but might be command line 
+Q <- 87 #49 #47 first find the JPEG Quality factor: can be found by trial and error but might be command line 
 # arg to print this from image (researching this)
-Nf <- 4 # the program prints row/column pairs of offset frequencies greater than Nf 
+Nf <- 30 #4 #30 the program prints row/column pairs of offset frequencies greater than Nf 
 # adjust Nf up or down so that the # pairs printed  = # copied regions, larger copied regions should have higher Nf
-Nd <- 128 # minimum offset distance of the matching block: increase as much as possible to remove any false
+Nd <- 128 #128 #8 minimum offset distance of the matching block: increase as much as possible to remove any false
 # positives (boxes not in the copied region)
 
 # user choices
+T <- 8 # use 8 for the luminence JPEG Q-matrix or chrom for chrominance 
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
 par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial
-# eg. for 512x512 image: 88 seconds if par=16, 500 seconds if par=0 
+# for 512x512 image: 88 seconds if par=16, 500 seconds if par=0 
 
 # TO DO: 
 # fix: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
 # get Q factor with histogram of dct coefficients
 # Block artifact grid
-# block size 8 option
 
-dctCP<-function(imageIn,c=0,par=4,dim3=3,Nf=10,Nd=2,Q=50){
 
-  boxside <- 16 
+
+#dctCP<-function(imageIn,c=0,par=4,dim3=3,Nf=10,Nd=2,Q=50){ # take out dim3 and test for it
+dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,T=8){  
   
   # note that images are read in differently (depending on function/package)
   width <- nrow(imageIn) 
   height<- ncol(imageIn)
+  dim <- dim(imageIn)
   
   imageInCopy <-imageIn # to work with a b/w image
   
-  if (dim3 == 3){
+  if (dim[3] == 3){
     # standard way to convert to black and white
     red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
     imageIn <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]}
 
   # add a 3rd dimension to color on if b/w input image:
-  if (dim3 == 1){imageInCopy<-array(imageInCopy,dim=c(width,height,3))}
-    
+  if (is.na(dim[3])){imageInCopy<-array(imageInCopy,dim=c(width,height,3))}
+  
+  if (T == 16){  
   # JPEG Chrominance Quantization Matrix 
   T <- matrix(99,boxside,boxside) # (16-by-16) form
-  T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)
+  T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)}
+  
+  if  (T == 8){
+  boxside <- 8
+  # JPEG Luminence Quantization Matrix (use boxside of 8 with Nf of 30, Nd =128, Q = 95) (40 with 90 on desktop) 87 with 30 best!
+  T2 <- c(16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55,
+  14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62,
+  18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92,
+  49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99)
+  }
+  
   
   # IJG scaling:
   if (Q>=50){
@@ -54,7 +67,7 @@ dctCP<-function(imageIn,c=0,par=4,dim3=3,Nf=10,Nd=2,Q=50){
   dctMatrix <- function(imageIn){
     require('dtt')
     imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
-    boxside <- 16
+    #boxside <- 8
     width <- nrow(imageIn)
     height<- ncol(imageIn)
     # in parallel we will miss boxside - 1 blocks per worker in current form
@@ -77,8 +90,8 @@ dctCP<-function(imageIn,c=0,par=4,dim3=3,Nf=10,Nd=2,Q=50){
   ### Parallel:
   if (par>0){
     require('partools') 
-    cls <-makeCluster(par) 
-    clusterExport(cls, varlist=c('dctMatrix',"T"), envir=environment())
+    cls <-makeCluster(par)    
+    clusterExport(cls, varlist=c('dctMatrix',"T", "boxside"), envir=environment())
     clusterEvalQ(cls, require('dtt'))
     
     distribsplit(cls, 'imageIn')
@@ -140,6 +153,6 @@ dctCP<-function(imageIn,c=0,par=4,dim3=3,Nf=10,Nd=2,Q=50){
 }
 
 
-print(system.time(imageInCopy<-dctCP(imageIn,c,par,dim3,Nf,Nd,Q)))
+print(system.time(imageInCopy<-dctCP(imageIn,c,par,Nf,Nd,Q,8)))
 # need to rerun this line to refresh image:
 display(imageInCopy)
