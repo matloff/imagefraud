@@ -16,7 +16,6 @@ T <- 8 # use 8 for the luminence JPEG Q-matrix or chrom for chrominance
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
 par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial
-# for 512x512 image: 88 seconds if par=16, 500 seconds if par=0 
 
 # TO DO: 
 # fix: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
@@ -24,8 +23,6 @@ par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix
 # Block artifact grid
 
 
-
-#dctCP<-function(imageIn,c=0,par=4,dim3=3,Nf=10,Nd=2,Q=50){ # take out dim3 and test for it
 dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,T=8){  
   
   # note that images are read in differently (depending on function/package)
@@ -43,7 +40,8 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,T=8){
   # add a 3rd dimension to color on if b/w input image:
   if (is.na(dim[3])){imageInCopy<-array(imageInCopy,dim=c(width,height,3))}
   
-  if (T == 16){  
+  if (T == 16){ 
+  boxside <- 16
   # JPEG Chrominance Quantization Matrix 
   T <- matrix(99,boxside,boxside) # (16-by-16) form
   T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)}
@@ -54,8 +52,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,T=8){
   T2 <- c(16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55,
   14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62,
   18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92,
-  49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99)
-  }
+  49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99)}
   
   
   # IJG scaling:
