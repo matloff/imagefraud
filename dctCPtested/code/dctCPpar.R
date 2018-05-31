@@ -4,7 +4,7 @@ imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
 
 #display(imageIn)
 
-Q <- 87 #49 #47 first find the JPEG Quality factor: can be found by trial and error but might be command line 
+Q <- 49 #87 #49 #47 first find the JPEG Quality factor: can be found by trial and error but might be command line 
 # arg to print this from image (researching this)
 Nf <- 30 #4 #30 the program prints row/column pairs of offset frequencies greater than Nf 
 # adjust Nf up or down so that the # pairs printed  = # copied regions, larger copied regions should have higher Nf
@@ -12,18 +12,17 @@ Nd <- 128 #128 #8 minimum offset distance of the matching block: increase as muc
 # positives (boxes not in the copied region)
 
 # user choices
-bside <- 8 # use 8 for the luminence JPEG Q-matrix or chrom for chrominance 
+boxside <- 16 # use 8 for the luminence JPEG Q-matrix or 16 for chrominance (16 is slower)
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial
-# for 512x512 image: 88 seconds if par=16, 500 seconds if par=0 
+par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial (much slower)
 
 # TO DO: 
 # fix: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
 # get Q factor with histogram of dct coefficients
 # Block artifact grid
 
-dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,bside=8){  
+dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){  
   
   # note that images are read in differently (depending on function/package)
   width <- nrow(imageIn) 
@@ -40,14 +39,12 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,bside=8){
   # add a 3rd dimension to color on if b/w input image:
   if (is.na(dim[3])){imageInCopy<-array(imageInCopy,dim=c(width,height,3))}
   
-  if (bside == 16){  
-  boxside <- 16
+  if (boxside == 16){  
   # JPEG Chrominance Quantization Matrix 
   T <- matrix(99,boxside,boxside) # (16-by-16) form
   T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)}
   
-  if  (bside == 8){
-  boxside <- 8
+  if  (boxside == 8){
   # JPEG Luminence Quantization Matrix 
   T <- c(16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55,
   14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62,
@@ -89,20 +86,6 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,bside=8){
   if (par>0){
     require('partools') 
     cls <-makeCluster(par)
-    
-    # j <- 1 # start index in image chunk
-    # rowsevn <- round(width/length(cls)) # approx chunk size
-    # m <- matrix(0,nrow=(rowsevn+boxside-1),ncol=height) 
-    # for (i in 1:(length(cls)-1)){
-    #   k <- j + (rowsevn+(boxside-1))
-    #   m[,1:height]<-image[j:k,]
-    #   clusterExport(cls, 'm', envir=environment())# should only be specific node
-    #   j <- k - (boxside-1)
-    # }
-    # m[,1:height]<-image[j:width,]
-    # clusterExport(cls, 'm', envir=environment()) # highest node
-    
-    
     clusterExport(cls, varlist=c('dctMatrix',"T", "boxside"), envir=environment())
     clusterEvalQ(cls, require('dtt'))
     
@@ -165,7 +148,6 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,bside=8){
 }
 
 
-print(system.time(imageInCopy<-dctCP(imageIn,c,par,Nf,Nd,Q,8)))
+print(system.time(imageInCopy<-dctCP(imageIn,c,par,Nf,Nd,Q,boxside)))
 # need to rerun this line to refresh image:
 display(imageInCopy)
-
