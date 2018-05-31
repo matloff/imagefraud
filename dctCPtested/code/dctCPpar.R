@@ -6,7 +6,7 @@ imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
 
 Q <- 49 #87 #49 #47 first find the JPEG Quality factor: can be found by trial and error but might be command line 
 # arg to print this from image (researching this)
-Nf <- 30 #4 #30 the program prints row/column pairs of offset frequencies greater than Nf 
+Nf <- 4 #4 #30 the program prints row/column pairs of offset frequencies greater than Nf 
 # adjust Nf up or down so that the # pairs printed  = # copied regions, larger copied regions should have higher Nf
 Nd <- 128 #128 #8 minimum offset distance of the matching block: increase as much as possible to remove any false
 # positives (boxes not in the copied region)
@@ -62,7 +62,6 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   dctMatrix <- function(imageIn){
     require('dtt')
     imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
-    #boxside <- 8
     width <- nrow(imageIn)
     height<- ncol(imageIn)
     # in parallel we will miss boxside - 1 blocks per worker in current form
