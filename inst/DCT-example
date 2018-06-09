@@ -1,0 +1,15 @@
+
+001_F.jpg source: cant find it :( (was a good one)
+
+Use Q <- 49, Nf <- 4, Nd <- 128  (for chrominence)
+
+Use Q <- 87, Nf <- 30, Nd <- 128 (for luminence)
+
+copied.jpg source: https://www5.cs.fau.de/research/data/image-manipulation/
+
+Use Q <- 63, Nf <- 110, Nd<-10
+
+cat3.jpg source: R bloggers (I forged the copy-paste region)
+
+Q <- 70 Nf <- 10 Nd <-2 (maybe can do better was just first try)
+
