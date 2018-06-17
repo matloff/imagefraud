@@ -2,13 +2,14 @@ library(EBImage)
 
 imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
 
+
 #display(imageIn)
 
 Q <- 49 #87 #49 #47 first find the JPEG Quality factor: can be found by trial and error but might be command line 
 # arg to print this from image (researching this)
-Nf <- 4 #4 #30 the program prints row/column pairs of offset frequencies greater than Nf 
+Nf <- 4#30 #4 #30 the program prints row/column pairs of offset frequencies greater than Nf 
 # adjust Nf up or down so that the # pairs printed  = # copied regions, larger copied regions should have higher Nf
-Nd <- 128 #128 #8 minimum offset distance of the matching block: increase as much as possible to remove any false
+Nd <- 128 #8 minimum offset distance of the matching block: increase as much as possible to remove any false
 # positives (boxes not in the copied region)
 
 # user choices
@@ -52,7 +53,6 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99)
   }
   
-  
   # IJG scaling:
   if (Q>=50){
     S <- 200-(2*Q)}
@@ -87,9 +87,21 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
     cls <-makeCluster(par)
     clusterExport(cls, varlist=c('dctMatrix',"T", "boxside"), envir=environment())
     clusterEvalQ(cls, require('dtt'))
-    
     distribsplit(cls, 'imageIn')
+    # new :)
+    rowseven <- round(width/length(cls)) 
+    imageIn2 <- imageIn[(rowseven+1):(rowseven+(boxside-1)),]
+    for (i in 2:(par-1)){
+      j <-rowseven*i+1
+      k <- rowseven*i+(boxside-1)
+    imageIn2<-rbind(imageIn2, imageIn[j:k,])}
+    imageIn2 <- rbind(imageIn2, matrix(0, (boxside-1),dim(imageIn)[1]))
+    distribsplit(cls, 'imageIn2')
+    clusterEvalQ(cls, imageIn <- rbind(imageIn, imageIn2 ))
+    clusterEvalQ(cls, imageIn <- imageIn[apply(imageIn[,-1], 1, function(x) !all(x==0)),])
+   
     testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))
+    
     # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
     for (i in 2:length(cls)){ 
       testdctC[[i]][,((boxside^2) + 1)] <- testdctC[[i]][,((boxside^2) + 1)] + (i-1)*(height/length(cls)) 
@@ -145,8 +157,3 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
 
   imageInCopy
 }
-
-
-print(system.time(imageInCopy<-dctCP(imageIn,c,par,Nf,Nd,Q,boxside)))
-# need to rerun this line to refresh image:
-display(imageInCopy)
