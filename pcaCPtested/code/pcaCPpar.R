@@ -1,10 +1,10 @@
 library(EBImage)
-# for pca boxside 8, freq>50, and 1 column of pca features works
-imageIn <- readImage("/Users/robinyancey/desktop/copied.jpg")
+
+imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
 
 #display(imageIn)
 
-Nf <- 87 # the program prints row/column pairs of offset frequencies greater than Nf 
+Nf <- 80 #87 the program prints row/column pairs of offset frequencies greater than Nf 
 # adjust Nf up or down so that the # pairs printed  = # copied regions, larger copied regions should have higher Nf
 Nd <- 150 # minimum offset distance of the matching block: increase as much as possible to remove any false
 # positives (boxesnot in the copied region)
@@ -17,9 +17,8 @@ par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix
 # note1: parallel version requires partools package 
 # note2: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
 
-pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,Q=50){
+pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,Q=50,boxside=8){
 
-  boxside <- 16
   
   # note that images are read in differently (depending on function/package)
   width <- nrow(imageIn) 
@@ -40,7 +39,6 @@ pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,Q=50){
   pcaMatrix <- function(imageIn){
     require('scales')
     imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
-    boxside <- 16
     width <- nrow(imageIn)
     height<- ncol(imageIn)
     # in parallel we will miss boxside - 1 blocks per worker in current form
@@ -55,7 +53,7 @@ pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,Q=50){
         pca <- prcomp(imageIn[i:endw,j:endh])
         features <- pca$rotation[,1] # only 1 is best
         compact <- t(features) %*% t(imageIn[i:endw,j:endh])
-        block<- round(rescale(t(features %*% compact), to = c(0, 255))) #255 (increasing doesnt do anything)
+        block <- round(rescale(t(features %*% compact), to = c(0, 255))) #255 (increasing doesnt do anything)
         
         block <- t(as.vector(block))
         testpca[k,] <- c(block, i, j)
@@ -69,7 +67,7 @@ pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,Q=50){
   if (par>0){
     require('partools') 
     cls <-makeCluster(par)
-    clusterExport(cls, 'pcaMatrix', envir=environment())
+    clusterExport(cls, c('pcaMatrix', "boxside"), envir=environment())
     distribsplit(cls, 'imageIn')
     
     # new :)
