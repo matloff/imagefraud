@@ -95,7 +95,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
       j <-rowseven*i+1
       k <- rowseven*i+(boxside-1)
     imageIn2<-rbind(imageIn2, imageIn[j:k,])}
-    imageIn2 <- rbind(imageIn2, matrix(0, (boxside-1),dim(imageIn)[1]))
+    imageIn2 <- rbind(imageIn2, matrix(0, (boxside-1),dim(imageIn)[2]))
     distribsplit(cls, 'imageIn2')
     clusterEvalQ(cls, imageIn <- rbind(imageIn, imageIn2 ))
     clusterEvalQ(cls, imageIn <- imageIn[apply(imageIn[,-1], 1, function(x) !all(x==0)),])
