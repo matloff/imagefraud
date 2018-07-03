@@ -17,7 +17,7 @@ par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix
 # note1: parallel version requires partools package 
 # note2: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
 
-pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,Q=50,boxside=8){
+pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,boxside=8){
 
   
   # note that images are read in differently (depending on function/package)
