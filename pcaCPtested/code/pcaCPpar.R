@@ -145,6 +145,6 @@ pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,boxside=8){
 }
 
 
-print(system.time(imageInCopy<-pcaCP(imageIn,c,par,dim3,Nf,Nd,Q)))
+print(system.time(imageInCopy<-pcaCP(imageIn,c,par,dim3,Nf,Nd)))
 # need to rerun this line to refresh image:
 display(imageInCopy)
