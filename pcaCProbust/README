@@ -1,3 +1,7 @@
 copied.jpg source: https://www5.cs.fau.de/research/data/image-manipulation/
 
-Nf <- 150, Nd<-6, boxside=32
+Remember (just like in other 2 algorithms): 
+Nf is the frequency (total number) of the blocks in the offset copied region
+Nd is the minumum offset of the copied region to be detected
+
+Use Nf <- 250, Nd<-6
