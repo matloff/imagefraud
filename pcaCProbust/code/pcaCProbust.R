@@ -1,6 +1,6 @@
 library(EBImage)
 
-# PLEASE NOTE best so far but this can be improved to be exact with a few tweaks I am pretty sure 
+# PLEASE NOTE can be improved to be exact with a few tweaks I am pretty sure 
 # (probably Thursday Saturday) I will do these and will parallelize
 
 imageIn <- readImage("/Users/robinyancey/desktop/copied.jpg")
