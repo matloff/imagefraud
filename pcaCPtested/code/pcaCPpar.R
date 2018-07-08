@@ -12,12 +12,12 @@ Nd <- 150 # minimum offset distance of the matching block: increase as much as p
 # user choices
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix computation, if 0 it runs in serial
+#par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix computation, if 0 it runs in serial
 # for 512x512 image:  seconds if par=,  seconds if par=0 
 # note1: parallel version requires partools package 
 # note2: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
 
-pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,boxside=8){
+pcaCP<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=8){
 
   
   # note that images are read in differently (depending on function/package)
