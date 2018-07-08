@@ -4,4 +4,4 @@ Remember (just like in other 2 algorithms):
 Nf is the frequency (total number) of the blocks in the offset copied region
 Nd is the minumum offset of the copied region to be detected
 
-Use Nf <- 250, Nd<-6
+Use Nf <- 8, Nd<-200
