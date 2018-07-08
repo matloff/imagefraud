@@ -1,4 +1,4 @@
-I made an experimental "robust PCA" by using 8 of the block PCA features and all of the 9 features 
+I made an experimental "robust PCA" by using 8 of the block PCA features and all of the n features 
 (to identify a copied region) as in these papers:
 
 Naisbitt, M.B. (2016). Overlapping Block Based Algorithm for Copy-Move Forgery Detection in Digital Images.
@@ -6,7 +6,7 @@ Naisbitt, M.B. (2016). Overlapping Block Based Algorithm for Copy-Move Forgery D
 Lin, Hwei-Jen & Wang, Chun-Wei & Kao, Yang-Ta. (2009). Fast copy-move forgery detection. 
 WSEAS Transactions on Signal Processing. 5. 188-197. 
 
-(This method work the best so far! :))
+(This method work the best/fastest/easiest so far! :))
 
 Example image included:
 copied.jpg source: https://www5.cs.fau.de/research/data/image-manipulation/
@@ -15,4 +15,6 @@ Remember (just like in other 2 algorithms):
 Nf is the frequency (total number) of the blocks in the offset copied region
 Nd is the minumum offset of the copied region to be detected
 
-Use Nf <- 8, Nd <-200, boxside <- 32
+Test examples:
+
+For copied.jpg use Nf <- 8, Nd <-200, boxside <- 32, features <- 8
