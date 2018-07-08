@@ -1,4 +1,5 @@
-I made an experimental "robust PCA" by using 8 of the block PCA features and all of the 9 features as in these papers:
+I made an experimental "robust PCA" by using 8 of the block PCA features and all of the 9 features 
+(to identify a copied region) as in these papers:
 
 Naisbitt, M.B. (2016). Overlapping Block Based Algorithm for Copy-Move Forgery Detection in Digital Images.
 
