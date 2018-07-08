@@ -7,9 +7,13 @@ Use Q <- 49, Nf <- 4, Nd <- 128  (for chrominence)
 
 Use Q <- 87, Nf <- 30, Nd <- 128 (for luminence)
 
-copied.jpg source: https://www5.cs.fau.de/research/data/image-manipulation/
+copied.jpg source: 
+V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou: 
+"An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
+IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
 
 Use Q <- 63, Nf <- 110, Nd<-10
+
 
 cat3.jpg source: R bloggers (I forged the copy-paste region)
 
