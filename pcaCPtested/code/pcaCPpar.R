@@ -1,10 +1,10 @@
 library(EBImage)
 
-imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
+imageIn <- readImage("/Users/robinyancey/desktop/copied.jpg")
 
 #display(imageIn)
 
-Nf <- 80 #87 the program prints row/column pairs of offset frequencies greater than Nf 
+Nf <- 87 # the program prints row/column pairs of offset frequencies greater than Nf 
 # adjust Nf up or down so that the # pairs printed  = # copied regions, larger copied regions should have higher Nf
 Nd <- 150 # minimum offset distance of the matching block: increase as much as possible to remove any false
 # positives (boxesnot in the copied region)
@@ -12,33 +12,37 @@ Nd <- 150 # minimum offset distance of the matching block: increase as much as p
 # user choices
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-#par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix computation, if 0 it runs in serial
+par <- 8 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix computation, if 0 it runs in serial
 # for 512x512 image:  seconds if par=,  seconds if par=0 
 # note1: parallel version requires partools package 
 # note2: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
 
-pcaCP<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=8){
-
+pcaCP<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2){
+  require('scales')
+  boxside <- 32
   
   # note that images are read in differently (depending on function/package)
   width <- nrow(imageIn) 
   height<- ncol(imageIn)
   
   imageInCopy <-imageIn #we want to work witha b/w image
-  
+ 
   if (dim3 == 3){
     # standard way to convert to black and white
     red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
     imageIn <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]}
   
-  imageIn <- round(imageIn[1:width,1:height]) # removed 255 here for PCA
+  # kind of accidentally had this line but it works WAY better !?
+  imageIn <- round(imageIn[1:width,1:height]) 
+
   # add a 3rd dimension to color on if b/w input image:
   if (dim3 == 1){imageInCopy<-array(imageInCopy,dim=c(width,height,3))}
   
-
+  
   pcaMatrix <- function(imageIn){
     require('scales')
     imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
+    boxside <- 32
     width <- nrow(imageIn)
     height<- ncol(imageIn)
     # in parallel we will miss boxside - 1 blocks per worker in current form
@@ -49,11 +53,11 @@ pcaCP<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=8){
       for (j in 1:(height-boxside+1)){
         endw <- i+(boxside-1)
         endh <- j+(boxside-1) 
-
+        
         pca <- prcomp(imageIn[i:endw,j:endh])
         features <- pca$rotation[,1] # only 1 is best
         compact <- t(features) %*% t(imageIn[i:endw,j:endh])
-        block <- round(rescale(t(features %*% compact), to = c(0, 255))) #255 (increasing doesnt do anything)
+        block<- round(rescale(t(features %*% compact), to = c(0, 255))) #255 (increasing doesnt do anything)
         
         block <- t(as.vector(block))
         testpca[k,] <- c(block, i, j)
@@ -67,7 +71,7 @@ pcaCP<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=8){
   if (par>0){
     require('partools') 
     cls <-makeCluster(par)
-    clusterExport(cls, c('pcaMatrix', "boxside"), envir=environment())
+    clusterExport(cls, 'pcaMatrix', envir=environment())
     distribsplit(cls, 'imageIn')
     
     # new :)
@@ -81,10 +85,7 @@ pcaCP<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=8){
     distribsplit(cls, 'imageIn2')
     clusterEvalQ(cls, imageIn <- rbind(imageIn, imageIn2 ))
     clusterEvalQ(cls, imageIn <- imageIn[apply(imageIn[,-1], 1, function(x) !all(x==0)),])
-    
-    
-    
-    
+ 
     testpcaC <- clusterEvalQ(cls, testpcaC <- pcaMatrix(imageIn))
     # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
     for (i in 2:length(cls)){ 
@@ -102,7 +103,7 @@ pcaCP<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=8){
   size <- dim(testpca)[1]
   
   # sort lexographically by all columns (accept location columns)
-
+  
   testpca <- testpca[do.call(order, lapply(1:(boxside^2), function(i) testpca[,i])),]
   
   pcaLocations <- testpca[,((boxside^2)+1):((boxside^2)+2)] # locations only
