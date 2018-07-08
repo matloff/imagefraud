@@ -1,3 +1,13 @@
+I made a "robust PCA" by using part of the PCA features and all of the 9 features as in these papers:
+
+Naisbitt, M.B. (2016). Overlapping Block Based Algorithm for Copy-Move Forgery Detection in Digital Images.
+
+Lin, Hwei-Jen & Wang, Chun-Wei & Kao, Yang-Ta. (2009). Fast copy-move forgery detection. 
+WSEAS Transactions on Signal Processing. 5. 188-197. 
+
+(This method work the best so far! :))
+
+Example image included:
 copied.jpg source: https://www5.cs.fau.de/research/data/image-manipulation/
 
 Remember (just like in other 2 algorithms): 
