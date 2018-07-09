@@ -19,7 +19,7 @@ Image database source: V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopo
 IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
 
 For 001_F.jpg:
-use Nf <- , Nd <- 200, boxside <- 8, features <- 2
+use Nf <- 5, Nd <- 200, boxside <- 16, features <- 0
 Image database source:
 D. Tralic, I. Zupancic, S. Grgic, and M. Gr- gic, “CoMoFoD - new database for copy-move forgery detection,” 
 in 55th International Sympo- sium ELMAR, pp. 49–54, Sept 2013.
