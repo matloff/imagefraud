@@ -106,7 +106,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
     
     # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
     for (i in 2:length(cls)){ 
-      testdctC[[i]][,((boxside^2) + 1)] <- testdctC[[i]][,((boxside^2) + 1)] + (i-1)*(height/length(cls)) 
+      testdctC[[i]][,((boxside^2) + 1)] <- testdctC[[i]][,((boxside^2) + 1)] + (i-1)*(width/length(cls)) 
     }
     # combine all testdctC chunks to make new large testdct
     testdct<-do.call('rbind',testdctC) 
