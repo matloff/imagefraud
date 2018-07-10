@@ -1,3 +1,4 @@
+
 library(EBImage)
 
 imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
@@ -16,7 +17,7 @@ Nd <- 128 #8 minimum offset distance of the matching block: increase as much as 
 boxside <- 16 # use 8 for the luminence JPEG Q-matrix or 16 for chrominance (16 is slower)
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial (much slower)
+par <- 2 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial (much slower)
 
 # TO DO: 
 # fix: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
@@ -36,21 +37,21 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
     # standard way to convert to black and white
     red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
     imageIn <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]}
-
+  
   # add a 3rd dimension to color on if b/w input image:
   if (is.na(dim[3])){imageInCopy<-array(imageInCopy,dim=c(width,height,3))}
   
   if (boxside == 16){  
-  # JPEG Chrominance Quantization Matrix 
-  T <- matrix(99,boxside,boxside) # (16-by-16) form
-  T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)}
+    # JPEG Chrominance Quantization Matrix 
+    T <- matrix(99,boxside,boxside) # (16-by-16) form
+    T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)}
   
   if  (boxside == 8){
-  # JPEG Luminence Quantization Matrix 
-  T <- c(16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55,
-  14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62,
-  18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92,
-  49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99)
+    # JPEG Luminence Quantization Matrix 
+    T <- c(16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55,
+           14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62,
+           18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92,
+           49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99)
   }
   
   # IJG scaling:
@@ -91,15 +92,16 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
     # new :)
     rowseven <- round(width/length(cls)) 
     imageIn2 <- imageIn[(rowseven+1):(rowseven+(boxside-1)),]
+    if (par > 2){
     for (i in 2:(par-1)){
-      j <-rowseven*i+1
+      j <- rowseven*i+1
       k <- rowseven*i+(boxside-1)
-    imageIn2<-rbind(imageIn2, imageIn[j:k,])}
-    imageIn2 <- rbind(imageIn2, matrix(0, (boxside-1),dim(imageIn)[2]))
+      imageIn2<-rbind(imageIn2, imageIn[j:k,])}}
+    imageIn2 <- rbind(imageIn2, matrix(0, (boxside-1), dim(imageIn)[2]))
     distribsplit(cls, 'imageIn2')
     clusterEvalQ(cls, imageIn <- rbind(imageIn, imageIn2 ))
     clusterEvalQ(cls, imageIn <- imageIn[apply(imageIn[,-1], 1, function(x) !all(x==0)),])
-   
+    
     testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))
     
     # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
@@ -108,7 +110,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
     }
     # combine all testdctC chunks to make new large testdct
     testdct<-do.call('rbind',testdctC) 
-    }
+  }
   
   ### Serial:
   if (par==0){
@@ -127,33 +129,37 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   pairLoc1 <- matrix(0, size, 2) # these hold the just box locations of pairs with > Nd offset
   pairLoc2 <- matrix(0, size, 2) 
   pairFrequencies <- matrix(0, width, height)
-    for (i in 1:(size-1)){
-      if (all(testdct[i,] == testdct[(i+1),])){
-        distancePair[numFound,1] <- abs(dctLocations[i,1] - dctLocations[(i+1),1]) # row offset
-        distancePair[numFound,2] <- abs(dctLocations[i,2] - dctLocations[(i+1),2]) # column offset
-        if (sqrt(distancePair[numFound,1]^2+distancePair[numFound,1]^2)>Nd){ # absolute distance between matching blocks
-          pairLoc1[numFound,] <- dctLocations[i,] # record this location
-          pairLoc2[numFound,] <- dctLocations[(i+1),] # increment matrix counting offset frequencies:
-          pairFrequencies[distancePair[numFound,1], distancePair[numFound,2]] <- pairFrequencies[distancePair[numFound,1], distancePair[numFound,2]] + 1
-          numFound <- numFound + 1
-        }
+  for (i in 1:(size-1)){
+    if (all(testdct[i,] == testdct[(i+1),])){
+      distancePair[numFound,1] <- abs(dctLocations[i,1] - dctLocations[(i+1),1]) # row offset
+      distancePair[numFound,2] <- abs(dctLocations[i,2] - dctLocations[(i+1),2]) # column offset
+      if (sqrt(distancePair[numFound,1]^2+distancePair[numFound,1]^2)>Nd){ # absolute distance between matching blocks
+        pairLoc1[numFound,] <- dctLocations[i,] # record this location
+        pairLoc2[numFound,] <- dctLocations[(i+1),] # increment matrix counting offset frequencies:
+        pairFrequencies[distancePair[numFound,1], distancePair[numFound,2]] <- pairFrequencies[distancePair[numFound,1], distancePair[numFound,2]] + 1
+        numFound <- numFound + 1
       }
-    } 
-
+    }
+  } 
+  
   # print the frequencies above the threshold by running line by line in function:
   # "which(pairFrequencies > Nf, arr.ind=TRUE)" and changing Nf to check # pairs
   freqPairs <- which(pairFrequencies > Nf, arr.ind=TRUE) 
   if (nrow(freqPairs)>=1){
     print(freqPairs)}
-
-    for (i in 1:(numFound-1)){
-      for (j in 1:nrow(freqPairs)){
-        if (distancePair[i,] == freqPairs[j,]){ # color matching boxes
-          imageInCopy[pairLoc1[i,1]:(pairLoc1[i,1]+boxside - 1), pairLoc1[i,2]:(pairLoc1[i,2]+boxside - 1),1:dim3] = c
-          imageInCopy[pairLoc2[i,1]:(pairLoc2[i,1]+boxside - 1), pairLoc2[i,2]:(pairLoc2[i,2]+boxside - 1),1:dim3] = c
-        }
+  
+  for (i in 1:(numFound-1)){
+    for (j in 1:nrow(freqPairs)){
+      if (distancePair[i,] == freqPairs[j,]){ # color matching boxes
+        imageInCopy[pairLoc1[i,1]:(pairLoc1[i,1]+boxside - 1), pairLoc1[i,2]:(pairLoc1[i,2]+boxside - 1),1:dim3] = c
+        imageInCopy[pairLoc2[i,1]:(pairLoc2[i,1]+boxside - 1), pairLoc2[i,2]:(pairLoc2[i,2]+boxside - 1),1:dim3] = c
       }
     }
-
+  }
+  
   imageInCopy
 }
+
+print(system.time(imageInCopy<-dctCP(imageIn,c,par,Nf,Nd,Q,boxside)))
+# need to rerun this line to refresh image:
+display(imageInCopy)
