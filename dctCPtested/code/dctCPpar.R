@@ -86,7 +86,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   if (par>0){
     require('partools') 
     cls <-makeCluster(par)
-    clusterExport(cls, varlist=c('dctMatrix',"T", "boxside"), envir=environment())
+    clusterExport(cls, varlist=c('dctMatrix',"T", "boxside", "width"), envir=environment())
     clusterEvalQ(cls, require('dtt'))
     distribsplit(cls, 'imageIn')
     # new :)
@@ -104,7 +104,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
     
     testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))
     
-    # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
+    # need to correct i, j locations so add width/(cls[[n]]$rank-1) to i 
     for (i in 2:length(cls)){ 
       testdctC[[i]][,((boxside^2) + 1)] <- testdctC[[i]][,((boxside^2) + 1)] + (i-1)*(width/length(cls)) 
     }
