@@ -17,7 +17,7 @@ Nd <- 128 #8 minimum offset distance of the matching block: increase as much as 
 boxside <- 16 # use 8 for the luminence JPEG Q-matrix or 16 for chrominance (16 is slower)
 dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
-par <- 2 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial (much slower)
+par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel dct matrix computation, if 0 it runs in serial (much slower)
 
 # TO DO: 
 # fix: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
