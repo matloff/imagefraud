@@ -3,19 +3,9 @@
 D. Tralic, I. Zupancic, S. Grgic, and M. Gr- gic, “CoMoFoD - new database for copy-move forgery detection,” 
 in 55th International Sympo- sium ELMAR, pp. 49–54, Sept 2013.
 
-Use Q <- 49, Nf <- 4, Nd <- 128  (for chrominence)
+Use Q <- 49, Nf <- 4, Nd <- 128  (boxside <- 16 for chrominence)
 
-Use Q <- 87, Nf <- 30, Nd <- 128 (for luminence)
-
-copied.jpg source: 
-V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou: 
-"An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
-IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
-
-Use Q <- 63, (updating other 2 parameters soon)
+Use Q <- 87, Nf <- 30, Nd <- 128 (boxside <- 8 for luminence)
 
 
-cat3.jpg source: R bloggers (I forged the copy-paste region)
-
-Q <- 70 Nf <- 10 Nd <-2 (maybe can do better was just first try)
 
