@@ -5,11 +5,11 @@ imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
 
 #display(imageIn)
 
-# Q <- 87 #49 #47 first find the JPEG Quality factor: can be found by trial and error but might be command line 
+Q <- 87 #49 #47 first find the JPEG Quality factor: can be found by trial and error but might be command line 
 # # arg to print this from image (researching this)
-# Nf <- 30 #4 #30 the program prints row/column pairs of offset frequencies greater than Nf 
+Nf <- 30 #4 #30 the program prints row/column pairs of offset frequencies greater than Nf 
 # # adjust Nf up or down so that the # pairs printed  = # copied regions, larger copied regions should have higher Nf
-# Nd <- 128 #8 minimum offset distance of the matching block: increase as much as possible to remove any false positives
+Nd <- 128 #8 minimum offset distance of the matching block: increase as much as possible to remove any false positives
 
 
 # user choices
