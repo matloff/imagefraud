@@ -12,7 +12,7 @@ V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou:
 "An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
 IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
 
-Use Q <- 63, Nf <- 110, Nd<-10
+Use Q <- 63, (updating other 2 parameters soon)
 
 
 cat3.jpg source: R bloggers (I forged the copy-paste region)
