@@ -1,5 +1,4 @@
-I made an experimental "robust PCA" by using n of the block PCA features and all of the 9 characteristic
-features as in these papers:
+I made an experimental "robust PCA" by using n of the block PCA features and all of the 9 characteristic features as in these papers:
 
 Naisbitt, M.B. (2016). Overlapping Block Based Algorithm for Copy-Move Forgery Detection in Digital Images.
 
@@ -7,7 +6,6 @@ Lin, Hwei-Jen & Wang, Chun-Wei & Kao, Yang-Ta. (2009). Fast copy-move forgery de
 WSEAS Transactions on Signal Processing. 5. 188-197. 
 
 (This method work the best/fastest/easiest so far! :))
-
 
 
 Test examples:
