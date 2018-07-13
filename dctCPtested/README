@@ -1,0 +1,23 @@
+
+There are two example codes in the folder (within this folder) called "code" which already have specified the input 
+parameters (also below) to black out copied regions for the test image "001_F.jpg" (also included in the folder).
+
+Use Q <- 49, Nf <- 4, Nd <- 128  (boxside <- 16 for chrominence)
+
+Use Q <- 87, Nf <- 30, Nd <- 128 (boxside <- 8 for luminence)
+
+001_F.jpg source: 
+D. Tralic, I. Zupancic, S. Grgic, and M. Gr- gic, “CoMoFoD - new database for copy-move forgery detection,” 
+in 55th International Sympo- sium ELMAR, pp. 49–54, Sept 2013.
+
+
+There are also two other test images "cat.jpg" (self-made), and "copied.jpg" from the database cited below:
+
+Image database source: V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou: 
+"An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
+IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
+
+Examples of the output (with blacked out copied regions) of each of the test images are provided in this folder, as well.
+
+
+
