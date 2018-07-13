@@ -10,3 +10,7 @@ as well as multiple test images and output (see README with subdirectory for mor
 
 pcaCPtested folder: contains a test code for comparison of the use of just PCA features for copy-paste forgery detection 
 (which has shown to not be as effective as other methods in our work and other research papers).
+
+A chroma-based method using Run Length Run Number (RLRN) encoding as well as SVM to detect any type of forgery based on the paper cited below will be added (within the next few days). 
+
+X. Zhao, J. Li, S. Li, and S. Wang, “Detecting digital image splicing in chroma spaces,” in Digital Watermarking, vol. 6526 of Lecture Notes in Computer Science, pp. 12–22, Springer, Berlin, Germany, 2011
