@@ -3,7 +3,7 @@ This is code uses a chroma-based method of feature analysis using Run Length Run
 It trains an SVM (Support Vector Machine) based on this feature array from a user input 
 of an entire database of images. (For example, the SVM trained with only 220 images will then be able to detect whether an input image is has any type of image fraud or not with 97% accuracy.)
 
-Example input:
+EXAMPLE INPUT:
 please, input the directory of the authentic and tampered training images as string:
 
 authenticDir <- "/Users/robinyancey/desktop/authentic"
@@ -21,6 +21,8 @@ par <- 4
 
 print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par)))
 
+NOTES:
+
 A feature is currently being added to use the (already created) feature vectors from the forged images found by the SVM, to
 find where in the image the fraud is detected (as the other algorithms do). 
 
@@ -33,6 +35,7 @@ The extracting the run-length feature is time-consuming (since it must process e
 each feature vector,) an input par of 2 or greater will run the feature a cluster. A super linear speedup was obtained witha. cluster of 4 lowering computational time of feature vectors from over and hour (in serial) to only a minute and a half 
 (so running in parallel is reccomended.)
 
+CITATIONS:
 
 The code was tested on a sample of 220 images from the CASIA database:
 
