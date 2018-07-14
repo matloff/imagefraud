@@ -1,3 +1,4 @@
+# RLRN Detection
 This is code uses a chroma-based method of feature analysis using Run Length Run Number (RLRN) endcoding.
 It trains an SVM (Support Vector Machine) based on this feature array from a user input 
 of an entire database of images. The SVM trained with only 220 images will then be able to detect whether an input
