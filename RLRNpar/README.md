@@ -1,8 +1,7 @@
 # RLRN Detection
 This is code uses a chroma-based method of feature analysis using Run Length Run Number (RLRN) endcoding.
 It trains an SVM (Support Vector Machine) based on this feature array from a user input 
-of an entire database of images. The SVM trained with only 220 images will then be able to detect whether an input
-image is has any type of image fraud or not with 97% accuracy.
+of an entire database of images. (For example, the SVM trained with only 220 images will then be able to detect whether an input image is has any type of image fraud or not with 97% accuracy.)
 
 Example input:
 please, input the directory of the authentic and tampered training images as string:
