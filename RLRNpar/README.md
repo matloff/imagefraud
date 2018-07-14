@@ -4,22 +4,19 @@ of an entire database of images. The SVM trained with only 220 images will then 
 image is has any type of image fraud or not.
 
 Example input:
-# please, input the directory of the authentic and tampered training images as string:
+please, input the directory of the authentic and tampered training images as string:
 
 authenticDir <- "/Users/robinyancey/desktop/authentic"
 tamperDir <- "/Users/robinyancey/desktop/tampered"
 
-# to increase the number of features per each of the 4 directions (and total features per channel)
-# increase 'pfeatures' variable below (increase V61 to V(4*pfeatures))
+- to increase the number of features per each of the 4 directions (and total features per channel)
+- increase 'pfeatures' variable below (increase V61 to V(4*pfeatures))
 
 pfeatures <- 15
 
-# to try more channels (internally) (probably not a good idea based on both papers):
-# 1. uncomment getting RGB channels from original image
-# 2. increase the number of repeated truth values for each image (rep(,n) in the truthVector variable)
 
-# to test on a cluster, set par to the number of worker nodes (par <- 0 is serial)
-# NOTE: please, make sure the number of images is divisible by the cluster size
+-to test on a cluster, set par to the number of worker nodes (par <- 0 is serial)
+- NOTE: please, make sure the number of images is divisible by the cluster size
 par <- 4
 
 print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par)))
