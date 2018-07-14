@@ -17,9 +17,12 @@ pfeatures <- 15
 
 - to test on a cluster, set par to the number of worker nodes (par <- 0 is serial)
 - NOTE: please, make sure the number of images is divisible by the cluster size
+
 par <- 4
 
-print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par)))
+- (optional) test whether images (which are unknown) are predicted fraudulent or not based on trained SVM
+
+newImagesDir <- "/Users/robinyancey/desktop/newImages"
 
 NOTES:
 
@@ -30,7 +33,7 @@ characterize the direction, area and geometrical shape of an object.
 Parallelization feature: 
 The extracting the run-length feature is time-consuming (since it must process every pixel in an entire image for 
 each feature vector,) an input par of 2 or greater will run the feature a cluster. A super linear speedup was obtained witha. cluster of 4 lowering computational time of feature vectors from over and hour (in serial) to only a minute and a half 
-(so running in parallel is reccomended.)
+(so running in parallel is reccomended.) SVM is also parallel when images > 700 (so that Software Alchemy is usable).
 
 A feature is currently being added to use the (already created) feature vectors from the forged images found by the SVM, to
 find where in the image the fraud is detected (as the other algorithms do). 
