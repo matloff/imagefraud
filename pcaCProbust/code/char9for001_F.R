@@ -23,7 +23,7 @@ par <- 0 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix
 # note1: parallel version requires partools package 
 # note2: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
 
-pcaCProbust<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,boxside=16,pfeatures=0){
+pcaCProbust<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=16,pfeatures=0){
   
   # note that images are read in differently (depending on function/package)
   width <- nrow(imageIn) 
@@ -96,38 +96,8 @@ pcaCProbust<-function(imageIn,c=0,par=8,dim3=3,Nf=10,Nd=2,boxside=16,pfeatures=0
     testpca
   } 
   
-  ### Parallel:
-  if (par>0){
-    require('partools') 
-    cls <-makeCluster(par)
-    clusterExport(cls, varlist=c('dctMatrix', "boxside"), envir=environment())
-    distribsplit(cls, 'imageIn')
-    
-    # new :)
-    rowseven <- round(width/length(cls)) 
-    imageIn2 <- imageIn[(rowseven+1):(rowseven+(boxside-1)),]
-    for (i in 2:(par-1)){
-      j <-rowseven*i+1
-      k <- rowseven*i+(boxside-1)
-      imageIn2<-rbind(imageIn2, imageIn[j:k,])}
-    imageIn2 <- rbind(imageIn2, matrix(0, (boxside-1),dim(imageIn)[2]))
-    distribsplit(cls, 'imageIn2')
-    clusterEvalQ(cls, imageIn <- rbind(imageIn, imageIn2 ))
-    clusterEvalQ(cls, imageIn <- imageIn[apply(imageIn[,-1], 1, function(x) !all(x==0)),])
-    testpcaC <- clusterEvalQ(cls, testpcaC <- pcaMatrix(imageIn))
-    # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
-    for (i in 2:length(cls)){ 
-      testpcaC[[i]][,((boxside^2) + 1)] <- testpcaC[[i]][,((boxside^2) + 1)] + (i-1)*(height/length(cls)) 
-    }
-    # combine all testpcaC chunks to make new large testpca
-    testpca<-do.call('rbind',testpcaC) 
-  }
   
-  
-  
-  ### Serial:
-  if (par==0){
-    testpca <- pcaMatrix(imageIn)}
+    testpca <- pcaMatrix(imageIn)
   
   # rewrite size since was divided on cls (shorter since misses rows of overlapping boxes)
   size <- dim(testpca)[1]
