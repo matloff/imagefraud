@@ -11,7 +11,7 @@ authenticDir <- "/Users/robinyancey/desktop/authentic"
 tamperDir <- "/Users/robinyancey/desktop/tampered"
 
 - to increase the number of features per each of the 4 directions (and total features per channel)
-- increase 'pfeatures' variable below (also increase V61 to V(4*pfeatures) but will change to do automatic today)
+- increase 'pfeatures' variable below 
 
 pfeatures <- 15
 
