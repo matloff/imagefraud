@@ -18,12 +18,8 @@ c <- 0 # color (0-255) of copied regions in output image
 boxside <- 16
 pfeatures <- 0
 # (will implement in parallel for this too very soon)
-par <- 0 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix computation, if 0 it runs in serial
-# for 512x512 image:  seconds if par=,  seconds if par=0 
-# note1: parallel version requires partools package 
-# note2: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
 
-pcaCProbust<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=16,pfeatures=0){
+pcaCProbust<-function(imageIn,c=0,dim3=3,Nf=10,Nd=2,boxside=16,pfeatures=0){
   
   # note that images are read in differently (depending on function/package)
   width <- nrow(imageIn) 
@@ -154,6 +150,6 @@ pcaCProbust<-function(imageIn,c=0,par=0,dim3=3,Nf=10,Nd=2,boxside=16,pfeatures=0
 }
 
 
-print(system.time(imageInCopy<-pcaCProbust(imageIn,c,par,dim3,Nf,Nd,boxside,pfeatures)))
+print(system.time(imageInCopy<-pcaCProbust(imageIn,c,dim3,Nf,Nd,boxside,pfeatures)))
 # need to rerun this line to refresh image:
 display(imageInCopy)
