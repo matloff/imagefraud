@@ -26,10 +26,6 @@ newImagesDir <- "/Users/robinyancey/desktop/newImages"
 
 NOTES:
 
-Why RLRN works:
-Since these features combine the color information as well as the shape of objects in an image, it is able to
-characterize the direction, area and geometrical shape of an object. 
-
 Parallelization feature: 
 The extracting the run-length feature is time-consuming (since it must process every pixel in an entire image for 
 each feature vector,) an input par of 2 or greater will run the feature a cluster. A super linear speedup was obtained witha. cluster of 4 lowering computational time of feature vectors from over and hour (in serial) to only a minute and a half 
