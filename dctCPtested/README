@@ -11,11 +11,16 @@ D. Tralic, I. Zupancic, S. Grgic, and M. Gr- gic, “CoMoFoD - new database for 
 in 55th International Sympo- sium ELMAR, pp. 49–54, Sept 2013.
 
 
-There are also two other test images "cat.jpg" (self-made), and "copied.jpg" from the database cited below:
+There are also two other test images: "copied.jpg" (from the database cited below)
+
+Use Q <- 70, Nf <- 20, Nd <- 100  (boxside <- 32 for chrominance) for now (first try inputs)
 
 Image database source: V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou: 
 "An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
 IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
+
+and  "cat.jpg" (self-made):
+
 
 Examples of the output (with blacked out copied regions) of each of the test images are provided in this folder, as well.
 
