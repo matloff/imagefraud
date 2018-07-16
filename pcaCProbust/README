@@ -1,11 +1,12 @@
 I made an experimental "robust PCA" by using n of the block PCA features and all of the 9 characteristic features as in these papers:
 
+
 Naisbitt, M.B. (2016). Overlapping Block Based Algorithm for Copy-Move Forgery Detection in Digital Images.
 
 Lin, Hwei-Jen & Wang, Chun-Wei & Kao, Yang-Ta. (2009). Fast copy-move forgery detection. 
 WSEAS Transactions on Signal Processing. 5. 188-197. 
 
-(This method work the best/fastest/easiest so far! :))
+(This method work the best/fastest/easiest so far! :)) + now PARALLEL.
 
 
 Test examples:
@@ -21,6 +22,8 @@ use Nf <- 5, Nd <- 100, boxside <- 16, features <- 0
 Image database source:
 D. Tralic, I. Zupancic, S. Grgic, and M. Gr- gic, “CoMoFoD - new database for copy-move forgery detection,” 
 in 55th International Sympo- sium ELMAR, pp. 49–54, Sept 2013.
+
+UPDATE: parallel version now only takes ~35s when par <- 4 (less with higher number of workers)
 
 Note: Remember (just like in other 2 algorithms) Nf is the frequency (total number) 
 of the blocks in the offset copied region Nd is the minumum offset of the copied 
