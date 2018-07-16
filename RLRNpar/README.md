@@ -21,6 +21,7 @@ pfeatures <- 15
 par <- 4
 
 - (optional) test whether images (which are unknown) are predicted fraudulent or not based on trained SVM
+- note: the SVM has not been tuned/trained for the new images so they accuracy of predicition may be lower
 
 newImagesDir <- "/Users/robinyancey/desktop/newImages"
 
