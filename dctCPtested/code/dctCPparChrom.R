@@ -37,7 +37,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   # add a 3rd dimension to color on if b/w input image:
   if (is.na(dim[3])){imageInCopy<-array(imageInCopy,dim=c(width,height,3))}
   
-  if (boxside == 16){  
+  if (boxside == 16 || 32){  
     # JPEG Chrominance Quantization Matrix 
     T <- matrix(99,boxside,boxside) # (16-by-16) form
     T[1:4,1:4]<-c(17, 18, 24, 47, 18, 21, 26, 66, 24, 26, 56, 99, 47, 66, 99, 99)}
@@ -146,9 +146,9 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   
   for (i in 1:(numFound-1)){
     for (j in 1:nrow(freqPairs)){
-      if (distancePair[i,] == freqPairs[j,]){ # color matching boxes
-        imageInCopy[pairLoc1[i,1]:(pairLoc1[i,1]+boxside - 1), pairLoc1[i,2]:(pairLoc1[i,2]+boxside - 1),1:dim3] = c
-        imageInCopy[pairLoc2[i,1]:(pairLoc2[i,1]+boxside - 1), pairLoc2[i,2]:(pairLoc2[i,2]+boxside - 1),1:dim3] = c
+      if (round(distancePair[i,]) == freqPairs[j,]){ # color matching boxes
+        imageInCopy[round(pairLoc1[i,1]):(round(pairLoc1[i,1])+boxside - 1), round(pairLoc1[i,2]):(round(pairLoc1[i,2])+boxside - 1),1:dim3] = c
+        imageInCopy[round(pairLoc2[i,1]):(round(pairLoc2[i,1])+boxside - 1), round(pairLoc2[i,2]):(round(pairLoc2[i,2])+boxside - 1),1:dim3] = c
       }
     }
   }
