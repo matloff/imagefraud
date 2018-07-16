@@ -264,41 +264,43 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
   testidxs <- sample(1:nrow(allImagesArray),numTest)
   test <- allImagesArray[testidxs,]
   train <- allImagesArray[-testidxs,] 
+  testTrue <- test$truths
+  test$truths <- 0 # just in case
   
   numTrain <- numImages - numTest
   print("Size of train set:")
   print(numTrain)
   
   if (par > 1 && numTrain > 700){ # any lower number of images could limit usability of SA
-  print("3 times below are for parallel svm tune/train/predict")
-  clusterExport(cls,'test', envir=environment()) 
-  distribsplit(cls,'train',scramble=T) 
-  clusterEvalQ(cls,require('e1071')) 
-  
-  print(system.time(clusterEvalQ(cls,tune <- tune.svm(truths ~., data = train, gamma =seq(.01, 0.1, by = .01), cost = seq(0.1,1, by = 0.1)))))
-  print(system.time(clusterEvalQ(cls, mysvm <- svm(truths ~., data = train, gamma = tune$best.parameters$gamma, cost = tune$best.parameters$cost))))
-  print(system.time(clusterEvalQ(cls, svmpredict <- predict(mysvm, test, type = "response"))))
-  clusterEvalQ(cls, svmpredict <- as.numeric(svmpredict))
-  svmpredictC <- clusterEvalQ(cls, svmpredictT <- t(svmpredict))
-  predictsvmC <-Reduce('+', svmpredictC) / par # Software Alchemy
-  predictsvmC <-round(predictsvmC-1)
-  print("Parallel SVM Output as Confusion Matrix")
-  print(table(pred=as.vector(predictsvmC), true=test$truths))
+    print("3 times below are for parallel svm tune/train/predict")
+    clusterExport(cls,'test', envir=environment()) 
+    distribsplit(cls,'train',scramble=T) 
+    clusterEvalQ(cls,require('e1071')) 
+    
+    print(system.time(clusterEvalQ(cls,tune <- tune.svm(truths ~., data = train, gamma =seq(.01, 0.1, by = .01), cost = seq(0.1,1, by = 0.1)))))
+    print(system.time(clusterEvalQ(cls, mysvm <- svm(truths ~., data = train, gamma = tune$best.parameters$gamma, cost = tune$best.parameters$cost))))
+    print(system.time(clusterEvalQ(cls, svmpredict <- predict(mysvm, test, type = "response"))))
+    clusterEvalQ(cls, svmpredict <- as.numeric(svmpredict))
+    svmpredictC <- clusterEvalQ(cls, svmpredictT <- t(svmpredict))
+    predictsvmC <-Reduce('+', svmpredictC) / par # Software Alchemy
+    predictsvmC <-round(predictsvmC-1)
+    print("Parallel SVM Output as Confusion Matrix")
+    print(table(pred=as.vector(predictsvmC), true=test$truths))
   }
-
+  
   # grid search method applied to obtain the best value for the and  parameters (RBF kernel)
   # 10-fold cross-validation is employed in classification
   # first paper: repeated 30 times for each parameter group (C,γ)
   else {
-  print("3 times below are for serial svm tune/train/predict")
-  print(system.time(tune <- tune.svm(truths ~., data = train, gamma =seq(.01, 0.1, by = .01), cost = seq(0.1,1, by = 0.1))))
-  # print(tune$best.parameters)
-  # first paper: the performance is measured by the average classification accuracy across the 30 runs
-  print(system.time(mysvm <- svm(truths ~., data = train, gamma = tune$best.parameters$gamma, cost = tune$best.parameters$cost)))
-  #print(summary(mysvm))
-  print(system.time(svmpredict <- predict(mysvm, test, type = "response")))
-  print("Serial SVM Output as Confusion Matrix")
-  print(table(pred=svmpredict, true=test$truths))
+    print("3 times below are for serial svm tune/train/predict")
+    print(system.time(tune <- tune.svm(truths ~., data = train, gamma =seq(.01, 0.1, by = .01), cost = seq(0.1,1, by = 0.1))))
+    # print(tune$best.parameters)
+    # first paper: the performance is measured by the average classification accuracy across the 30 runs
+    print(system.time(mysvm <- svm(truths ~., data = train, gamma = tune$best.parameters$gamma, cost = tune$best.parameters$cost)))
+    #print(summary(mysvm))
+    print(system.time(svmpredict <- predict(mysvm, test, type = "response")))
+    print("Serial SVM Output as Confusion Matrix")
+    print(table(pred=svmpredict, true=testTrue))
   }
   
   if (!is.null(newImagesDir)) {
