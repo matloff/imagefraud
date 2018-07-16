@@ -269,7 +269,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
   print("Size of train set:")
   print(numTrain)
   
-  if (par > 1 && numImages > 700){ # any lower number of images could limit usability of SA
+  if (par > 1 && numTrain > 700){ # any lower number of images could limit usability of SA
   print("3 times below are for parallel svm tune/train/predict")
   clusterExport(cls,'test', envir=environment()) 
   distribsplit(cls,'train',scramble=T) 
