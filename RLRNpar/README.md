@@ -29,7 +29,7 @@ NOTES:
 
 Parallelization feature: 
 The extracting the run-length feature is time-consuming (since it must process every pixel in an entire image for 
-each feature vector,) an input par of 2 or greater will run the feature a cluster. A super linear speedup was obtained witha. cluster of 4 lowering computational time of feature vectors from over and hour (in serial) to only a minute and a half 
+each feature vector,) an input par of 2 or greater will run the feature a cluster. A super linear speedup was obtained with a cluster of 4 lowering computational time of feature vectors from over and hour (in serial) to only a minute and a half 
 (so running in parallel is reccomended.) SVM is also parallel when images > 700 (so that Software Alchemy is usable).
 
 A feature is currently being added to use the (already created) feature vectors from the forged images found by the SVM, to
@@ -46,3 +46,15 @@ Credits for the use of the CASIA Image Tempering Detection Evaluation Database (
 The initial code is based on the paper cited below:
 
 X. Zhao, J. Li, S. Li, and S. Wang, “Detecting digital image splicing in chroma spaces,” in Digital Watermarking, vol. 6526 of Lecture Notes in Computer Science, pp. 12–22, Springer, Berlin, Germany, 2011
+
+WHY IT WORKS:
+
+Image splicing usually creates abrupt changes around certain objects or regions such as lines, edges and corners (which are sharper and rougher than regular lines, edges and corners) due to the copy-and-pasting. 
+
+The technique was first used for texture analysis and stegenalysis to detect hidden messages in images.
+
+For example, a constant texture is produced if local statistics are constant, slowly varying or approximately periodic (see below).
+
+Mir AH.; Hanmandlu, M.; Tandon, S.N., "Texture analysis of CT images," Engineering in Medicine and Biology Magazine, IEEE , vol.14, no.6, pp.781,786, Nov/Dec 1995.
+
+
