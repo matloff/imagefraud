@@ -97,7 +97,7 @@ pcaCProbust<-function(imageIn,c=0,dim3=3,Nf=10,Nd=2,par=4,boxside=16,pfeatures=0
   if (par>0){
     require('partools') 
     cls <-makeCluster(par)
-    clusterExport(cls, varlist=c('charMatrix',"pfeatures", "boxside","width"), envir=environment())
+    clusterExport(cls, varlist=c('charMatrix',"pfeatures", "boxside","height"), envir=environment())
     distribsplit(cls, 'imageIn')
     #new :)
     rowseven <- round(width/length(cls))
@@ -117,7 +117,7 @@ pcaCProbust<-function(imageIn,c=0,dim3=3,Nf=10,Nd=2,par=4,boxside=16,pfeatures=0
     
     # need to correct i, j locations so add height/(cls[[n]]$rank-1) to i 
     for (i in 2:length(cls)){ 
-      testpcaC[[i]][,((boxside^2) + 10)] <- testpcaC[[i]][,((boxside^2) + 10)] + (i-1)*(width/length(cls)) 
+      testpcaC[[i]][,((boxside^2) + 10)] <- testpcaC[[i]][,((boxside^2) + 10)] + (i-1)*(height/length(cls)) 
     }
     # combine all testdctC chunks to make new large testdct
     testpca<-do.call('rbind',testpcaC) 
