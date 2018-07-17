@@ -137,8 +137,8 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   for (i in 1:(numFound-1)){
     for (j in 1:nrow(freqPairs)){
       if (round(distancePair[i,]) == freqPairs[j,]){ # color matching boxes
-        imageInCopy[round(pairLoc1[i,1]):(round(pairLoc1[i,1])+boxside - 1), round(pairLoc1[i,2]):(round(pairLoc1[i,2])+boxside - 1),1:dim3] = c
-        imageInCopy[round(pairLoc2[i,1]):(round(pairLoc2[i,1])+boxside - 1), round(pairLoc2[i,2]):(round(pairLoc2[i,2])+boxside - 1),1:dim3] = c
+        imageInCopy[round(pairLoc1[i,1]):(round(pairLoc1[i,1])+boxside - 1), round(pairLoc1[i,2]):(round(pairLoc1[i,2])+boxside - 1),1:3] = c
+        imageInCopy[round(pairLoc2[i,1]):(round(pairLoc2[i,1])+boxside - 1), round(pairLoc2[i,2]):(round(pairLoc2[i,2])+boxside - 1),1:3] = c
       }
     }
   }
