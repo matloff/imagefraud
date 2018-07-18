@@ -19,8 +19,7 @@ Image database source: V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopo
 "An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
 IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
 
-and  "cat.jpg" (self-made):
-
+and  "cat.jpg" (self-made)
 
 Examples of the output (with blacked out copied regions) of each of the test images are provided in this folder, as well.
 
