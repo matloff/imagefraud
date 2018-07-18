@@ -12,7 +12,7 @@ WSEAS Transactions on Signal Processing. 5. 188-197.
 Test examples:
 
 For copied.jpg:
-use Nf <- 8, Nd <- 200, boxside <- 32, features <- 8
+use Nf <- 35, Nd <- 150, boxside <- 32, features <- 8
 Image database source: V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou: 
 "An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
 IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
