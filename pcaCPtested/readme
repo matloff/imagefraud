@@ -1,7 +1,0 @@
-note: please do not use this algorithm (it is just for testingg and comparing PCA alone to robust PCA versions)
-there are to many false negatives (or false positives depending on the number of quantization 
-levels of PCA features or the input image).
-
-Quantized DCT and Robust PCA in the other two folders seem to work perfect on the test images as specified.
-
-for copied.jpg: use Nf <- 75 Nd <-100 boxside <- 16
