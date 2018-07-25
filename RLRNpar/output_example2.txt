@@ -1,0 +1,38 @@
+# this test shows the output on the whole CASIA database (we use a cluster of 8 workers and Software
+# Alchemy for SVM since the tuning in serial version on the entire database will take /textbf{over two hours}.
+[1] "Feature vectors in test set:"
+
+[1] 10000
+
+[1] "Feature vectors in train set:"
+
+[1] 8832
+
+[1] "The 2 times below are for GLM training and prediction:"
+   user  system elapsed 
+  0.384   0.026   0.409 
+   user  system elapsed 
+  0.016   0.004   0.018 
+
+[1] "Serial GLM Output as fraction false:"
+[1] 0.0355
+
+[1] "Serial GLM Output as Confusion Matrix"
+    true
+pred    0    1
+   0 1944  137
+   1  218 7701
+
+[1] "3 times below are for parallel svm tune/train/predict"
+   user  system elapsed 
+  0.481   0.611 304.031 
+   user  system elapsed 
+  0.012   0.002   0.345 
+   user  system elapsed 
+  0.017   0.004   1.225 
+  
+[1] "Parallel SVM Output as Confusion Matrix"
+    true
+pred    0    1
+   0 1621   68
+   1  558 7753
