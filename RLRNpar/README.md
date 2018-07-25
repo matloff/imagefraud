@@ -34,11 +34,15 @@ The extracting the run-length feature is time-consuming (since it must process e
 each feature vector,) an input par of 2 or greater will run the feature a cluster. A super linear speedup was obtained with a cluster of 4 lowering computational time of feature vectors from over and hour (in serial) to only a minute and a half 
 (so running in parallel is reccomended.) SVM is also parallel when images > 700 (so that Software Alchemy is usable).
 
+numTest <- 73
+
+Enter a number lower than 2 times your number of images which will be the number of image feature vectors used to test
+the model created on on your database (# of train set vectors will be number of images times 2 - test set size)
 
 
 CITATIONS:
 
-The code was tested on a sample of 220 images from the CASIA database:
+The code was tested on images from the CASIA database:
 
 Credits for the use of the CASIA Image Tempering Detection Evaluation Database (CAISA TIDE) V2.0 are given to the National Laboratory of Pattern Recognition, Institute of Automation, Chinese Academy of Science, Corel Image Database and the photographers. http://forensics.idealtest.org"
 
