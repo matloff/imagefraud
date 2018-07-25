@@ -1,5 +1,7 @@
 # this test shows the output on the whole CASIA database (we use a cluster of 8 workers and Software
-# Alchemy for SVM since the tuning in serial version on the entire database will take /textbf{over two hours}.
+# Alchemy for SVM since the tuning in serial version on the entire database will take OVER 2 HOURS and
+# will still have slightly lower accuracy thab GLM:
+
 [1] "Feature vectors in test set:"
 
 [1] 10000
