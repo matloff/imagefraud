@@ -130,6 +130,8 @@ rlrnChannelVector <- function(imageIn,pfeatures){
 }
 
 
+
+
 imageFeatureVectors <-function(images, numImages, pfeatures){
   
   imageFeatureArray <- 1:(pfeatures*4)
@@ -187,7 +189,7 @@ imageFeatureVectors <-function(images, numImages, pfeatures){
 }
 
 
-testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=NULL){  
+testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newImagesDir=NULL){  
   require(EBImage)
   require("e1071")
   require('partools')
@@ -259,9 +261,8 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
   names(allImagesArray) <- c(1:(pfeatures*4),'truths')
   allImagesArray$truths <- as.factor(allImagesArray$truths)
   
-  numTest <- 73
-  #numTest <- 10000
-  print("Size of test set:")
+
+  print("Feature vectors in test set:")
   print(numTest)
   testidxs <- sample(1:nrow(allImagesArray),numTest)
   test <- allImagesArray[testidxs,]
@@ -270,17 +271,19 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
   test$truths <- 0 # just in case
   
   numTrain <- 2*(numImages) - numTest
-  print("Size of train set:")
+  print("Feature vectors in train set:")
   print(numTrain)
   
   print("The 2 times below are for GLM training and prediction:")
   # compare to GLM
   print(system.time(fit <- glm(truths ~., data=train, family=binomial())))
-  # summary(fit) see warning on sticky note
+  # summary(fit) 
   print(system.time(glmpredict <-predict(fit, newdata=test, type="response")))
+  print("Serial GLM Output as fraction false:")
   numFPs <- sum(abs(round(glmpredict) - (as.numeric(testTrue)-1)))
   print(numFPs/length(testTrue))
   #  0.03217585 that is 97% accurate!
+  print("Serial GLM Output as Confusion Matrix")
   print(table(pred=as.vector(round(glmpredict)), true=testTrue))
   
   #    true
@@ -301,6 +304,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
     svmpredictC <- clusterEvalQ(cls, svmpredictT <- t(svmpredict))
     predictsvmC <-Reduce('+', svmpredictC) / par # Software Alchemy
     predictsvmC <-round(predictsvmC-1)
+
     print("Parallel SVM Output as Confusion Matrix")
     #print(table(pred=as.vector(predictsvmC), true=test$truths))
     print(table(pred=as.vector(predictsvmC), true=testTrue))
@@ -324,6 +328,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
     print(system.time(mysvm <- svm(truths ~., data = train, gamma = tune$best.parameters$gamma, cost = tune$best.parameters$cost)))
     #print(summary(mysvm))
     print(system.time(svmpredict <- predict(mysvm, test, type = "response")))
+
     print("Serial SVM Output as Confusion Matrix")
     print(table(pred=svmpredict, true=testTrue))
     
@@ -352,7 +357,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
     truthVector <- t(c(rep(0,numTestNew*2)))
     truthVector <- t(truthVector)
     newImagesArray <- imageFeatureVectors(newImages, numTestNew, pfeatures)
-    #imageInCopy <- imageFeatureVectors2(newImages, numTestNew, pfeatures)
+    
     #display(imageInCopy)
     newImagesArray <- cbind(newImagesArray, truthVector)
     newImagesArray <- as.data.frame(newImagesArray)
@@ -382,6 +387,7 @@ authenticDir <- "/Users/robinyancey/desktop/authentic"
 tamperDir <- "/Users/robinyancey/desktop/tampered"
 # authenticDir <- "/Users/robinyancey/desktop/Au"
 # tamperDir <- "/Users/robinyancey/desktop/Tp"
+
 # to increase the number of features per each of the 4 directions (and total features per channel)
 # increase 'pfeatures' variable below (increase V61 to V(4*pfeatures))
 
@@ -397,6 +403,8 @@ par <- 8
 
 newImagesDir <- "/Users/robinyancey/desktop/newImagesDir"
 
-print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par, newImagesDir)))
+numTest <- 73
+
+print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par, numTest, newImagesDir)))
 
 display(imageInCopy)
