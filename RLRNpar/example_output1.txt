@@ -1,0 +1,59 @@
+#Example output using 224 images from the CASIA(see README) image database, and a parallel cluster of 8
+
+> source('~/Desktop/rlrnPar.R')
+[1] "Number of UNtampered images in data set:"
+[1] 103
+[1] "Number of tampered images in data set:"
+[1] 121
+[1] "Number of images in total:"
+[1] 224
+[1] "Time it takes to compute RLRN feature vectors:"
+   user  system elapsed 
+  0.094   0.105  77.772 
+[1] "Feature vectors in test set:"
+[1] 73
+[1] "Feature vectors in train set:"
+[1] 375
+[1] "The 2 times below are for GLM training and prediction:"
+   user  system elapsed 
+  0.053   0.003   0.057 
+   user  system elapsed 
+  0.003   0.000   0.003 
+[1] "Serial GLM Output as fraction false:"
+[1] 0.04109589
+[1] "Serial GLM Output as Confusion Matrix"
+    true
+pred  0  1
+   0 33  1
+   1  2 37
+[1] "3 times below are for serial svm tune/train/predict"
+   user  system elapsed 
+ 36.537   1.890  38.427 
+   user  system elapsed 
+  0.037   0.000   0.037 
+   user  system elapsed 
+  0.006   0.000   0.006 
+[1] "Serial SVM Output as Confusion Matrix"
+    true
+pred  0  1
+   0 32  0
+   1  3 38
+[1] "Number of new images to test:"
+[1] 18
+[1] "Are the new images fraudulent? (0 0 is fraud 1 1 is not, ordered by images in file (with SVM)"
+   user  system elapsed 
+  0.005   0.000   0.005 
+                                                                      
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 
+  
+0 
+Levels: 0 1
+[1] "Are the new images fraudulent? (0 0 is fraud 1 1 is not, ordered by images in file (with GLM)"
+   user  system elapsed 
+  0.003   0.000   0.004 
+                                                                      
+1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 
+  
+0 
+   user  system elapsed 
+143.561  22.904 281.189
