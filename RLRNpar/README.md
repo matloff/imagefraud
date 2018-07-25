@@ -3,6 +3,10 @@ This is code uses a chroma-based method of feature analysis using Run Length Run
 It trains an SVM (Support Vector Machine) based on this feature array from a user input 
 of an entire database of images. (For example, the SVM trained with only 220 images will then be able to detect whether an input image is has any type of image fraud or not with 97% accuracy.)
 
+*UPDATE: GLM takes only a few seconds to compute and was found to have better accuracy then SVM which takes over 2 hours to compute (using 10k test image feature arrays, trained on 18832 image feature vectors or 9416 different images), so GLM results are output first) 
+-note: to use SVM on the entire CASIA database as above use a parallel cluster of 16 to compute in minutes with only a slightly lower accuracy
+
+
 EXAMPLE INPUT:
 
 Please, input the directory of the authentic and tampered training images as string:
