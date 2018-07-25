@@ -3,7 +3,9 @@
 rlrnChannelVector <- function(imageIn,pfeatures){
   
   require('scales')
-  imageIn <-as.matrix(imageIn) 
+  imageIn <- as.matrix(imageIn) 
+  
+  imageInCopy <- imageIn
   
   width <- nrow(imageIn)
   height<- ncol(imageIn)
@@ -26,7 +28,7 @@ rlrnChannelVector <- function(imageIn,pfeatures){
   testrlrn <- matrix(0, nrow=1, ncol=(pfeatures*4))
   
   # calculate run lengths
-
+  
   # (actual) horizontal direction
   end <- 0
   for (i in 1:(width-2)){
@@ -46,10 +48,10 @@ rlrnChannelVector <- function(imageIn,pfeatures){
           end <- 1
         }
       }
-
+      
     }
   }
-
+  
   # (actual) vertical direction
   end <- 0
   for (i in 1:width){
@@ -69,10 +71,10 @@ rlrnChannelVector <- function(imageIn,pfeatures){
           end <- T
         }
       }
-
+      
     }
   }
-
+  
   # down diagonal direction 
   end <- 0
   for (i in 1:(width-2)){
@@ -92,10 +94,10 @@ rlrnChannelVector <- function(imageIn,pfeatures){
           end <- 1
         }
       }
-
+      
     }
   }
-
+  
   # counter diagonal direction (minus j, increment i of next element starting from from width)
   # (this is different in paper 2 which is probably wrong since it goes along the same direction)
   # ps: thoroughly checked both diagonals :)
@@ -117,14 +119,15 @@ rlrnChannelVector <- function(imageIn,pfeatures){
           end <- 1
         }
       }
-
+      
     }
   }
+  
+
   # multiply each column j by length j (each increment of the element represented 1 of that rl)
   testrlrn  <- testrlrn * t(c(1:pfeatures,1:pfeatures,1:pfeatures,1:pfeatures))
   
 }
-
 
 
 imageFeatureVectors <-function(images, numImages, pfeatures){
@@ -134,7 +137,7 @@ imageFeatureVectors <-function(images, numImages, pfeatures){
   for (i in 1:numImages){
     
     imageIn <- images[[i]]
-
+    
     # First paper: used only the 3 most accurate channels YCbCr (Y had 50% accuracy so dropped)
     # Second paper: very vow ~60% accuracy with RGB and high 90's with CrCb
     # (self note: may not use Y channel since also like RGB)
@@ -144,47 +147,46 @@ imageFeatureVectors <-function(images, numImages, pfeatures){
     # imageInG <- imageData(imageIn)[,,2]
     # # B color space
     # imageInB <- imageData(imageIn)[,,3]
-
+    
     # # Y color space
     # red.weight<- .2989; green.weight <- .587; blue.weight <- 0.114
     # imageInY <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]
-
+    
     # Cb color space
     red.weight<- -0.299; green.weight <- -0.587; blue.weight <-  0.886
     imageInCb <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]
-
+    
     # Cr color space
     red.weight<- 0.701; green.weight <-  -0.587; blue.weight <-  -0.114
     imageInCr <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]
-
+    
     # testrlrnR <- rlrnChannelMatrix(imageInR)
     # imageFeatureArray <- rbind(imageFeatureArray,testrlrnR)
-
+    
     # testrlrnG <- rlrnChannelMatrix(imageInG)
     # imageFeatureArray <- rbind(imageFeatureArray,testrlrnG)
-
+    
     # testrlrnB <- rlrnChannelMatrix(imageInB)
     # imageFeatureArray <- rbind(imageFeatureArray,testrlrnB)
-
+    
     # testrlrnY <- rlrnChannelVector(imageInY,pfeatures)
     # imageFeatureArray <- rbind(imageFeatureArray,testrlrnY)
-
+    
     testrlrnCb <- rlrnChannelVector(imageInCb,pfeatures)
     imageFeatureArray <- rbind(imageFeatureArray,testrlrnCb)
-
+    
     testrlrnCr <- rlrnChannelVector(imageInCr,pfeatures)
     imageFeatureArray <- rbind(imageFeatureArray,testrlrnCr)
-
+    
   }
-
+  
   imageFeatureArray <- imageFeatureArray[2:nrow(imageFeatureArray),]
   imageFeatureArray
 
+  
 }
 
-# should I make this so that it allows input of one (new) image to call
-# predict.svm on from the trained machine or should that be a separate function?
-#testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4){
+
 testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=NULL){  
   require(EBImage)
   require("e1071")
@@ -226,27 +228,27 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
   # # 1 is copied 0 is not copied
   truthVector <- t(c(rep(1,numTrues*2), rep(0,numFalses*2)))
   truthVector <- t(truthVector)
-  
+
   
   print("Time it takes to compute RLRN feature vectors:")
   if (par == 0) {
-  print(system.time(allImagesArray <- imageFeatureVectors(images, numImages, pfeatures)))}
+    print(system.time(allImagesArray <- imageFeatureVectors(images, numImages, pfeatures)))}
   
   if (par > 1){
-  cls <- makeCluster(par)
-  clusterEvalQ(cls, require(EBImage))
-  imagesPerNode <- round(numImages/par)
-  clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode"), envir=environment())
-
-  listimages <- list()
-  for (i in 1:par){
-    listimages[i]<-list(images[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
-  }
-
-  clusterApply(cls, listimages, function(m) {nodeImages <<- m; NULL})
-
-  print(system.time(allImagesArrayC <- clusterEvalQ(cls, allImagesArrayC <- imageFeatureVectors(nodeImages, imagesPerNode, pfeatures))))
-  allImagesArray <- do.call('rbind',allImagesArrayC)}
+    cls <- makeCluster(par)
+    clusterEvalQ(cls, require(EBImage))
+    imagesPerNode <- round(numImages/par)
+    clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode"), envir=environment())
+    
+    listimages <- list()
+    for (i in 1:par){
+      listimages[i]<-list(images[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
+    }
+    
+    clusterApply(cls, listimages, function(m) {nodeImages <<- m; NULL})
+    
+    print(system.time(allImagesArrayC <- clusterEvalQ(cls, allImagesArrayC <- imageFeatureVectors(nodeImages, imagesPerNode, pfeatures))))
+    allImagesArray <- do.call('rbind',allImagesArrayC)}
   
   # IMPORTANT:
   # applying pca and kernel pca (in paper 2) REDUCED TP rate and accuracy on Cr Cb channels
@@ -257,8 +259,8 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
   names(allImagesArray) <- c(1:(pfeatures*4),'truths')
   allImagesArray$truths <- as.factor(allImagesArray$truths)
   
-  
-  numTest <- round(numImages/3)
+  numTest <- 73
+  #numTest <- 10000
   print("Size of test set:")
   print(numTest)
   testidxs <- sample(1:nrow(allImagesArray),numTest)
@@ -267,9 +269,24 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
   testTrue <- test$truths
   test$truths <- 0 # just in case
   
-  numTrain <- numImages - numTest
+  numTrain <- 2*(numImages) - numTest
   print("Size of train set:")
   print(numTrain)
+  
+  print("The 2 times below are for GLM training and prediction:")
+  # compare to GLM
+  print(system.time(fit <- glm(truths ~., data=train, family=binomial())))
+  # summary(fit) see warning on sticky note
+  print(system.time(glmpredict <-predict(fit, newdata=test, type="response")))
+  numFPs <- sum(abs(round(glmpredict) - (as.numeric(testTrue)-1)))
+  print(numFPs/length(testTrue))
+  #  0.03217585 that is 97% accurate!
+  print(table(pred=as.vector(round(glmpredict)), true=testTrue))
+  
+  #    true
+  # pred    0    1
+  #      0 1949  105
+  #      1  249 7697
   
   if (par > 1 && numTrain > 700){ # any lower number of images could limit usability of SA
     print("3 times below are for parallel svm tune/train/predict")
@@ -285,7 +302,15 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
     predictsvmC <-Reduce('+', svmpredictC) / par # Software Alchemy
     predictsvmC <-round(predictsvmC-1)
     print("Parallel SVM Output as Confusion Matrix")
-    print(table(pred=as.vector(predictsvmC), true=test$truths))
+    #print(table(pred=as.vector(predictsvmC), true=test$truths))
+    print(table(pred=as.vector(predictsvmC), true=testTrue))
+    
+    # 807/1000 = 0.0807 -> only 92% accurate using SVM (at least with a SA cluster of 16)
+    #      true
+    # pred    0    1
+    #     0 1496   68
+    #     1  739  7697
+    
   }
   
   # grid search method applied to obtain the best value for the and  parameters (RBF kernel)
@@ -301,6 +326,12 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
     print(system.time(svmpredict <- predict(mysvm, test, type = "response")))
     print("Serial SVM Output as Confusion Matrix")
     print(table(pred=svmpredict, true=testTrue))
+    
+    # serial predictive power is slightly LOWER! 392/10000=0.0392 96%! and it took 7576.853 seconds (over two hours)
+    #     true
+    # pred    0    1
+    #     0 1911   68
+    #     1  324 7697
   }
   
   if (!is.null(newImagesDir)) {
@@ -321,17 +352,25 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
     truthVector <- t(c(rep(0,numTestNew*2)))
     truthVector <- t(truthVector)
     newImagesArray <- imageFeatureVectors(newImages, numTestNew, pfeatures)
+    #imageInCopy <- imageFeatureVectors2(newImages, numTestNew, pfeatures)
+    #display(imageInCopy)
     newImagesArray <- cbind(newImagesArray, truthVector)
-    newImagesArray <-as.data.frame(newImagesArray)
+    newImagesArray <- as.data.frame(newImagesArray)
     names(newImagesArray) <- c(1:(pfeatures*4),'truths')
     newImagesArray$truths <- as.factor(newImagesArray$truths)
+    
+    print("Are the new images fraudulent? (0 0 is fraud 1 1 is not, ordered by images in file (with SVM)")
     print(system.time(svmpredict <- predict(mysvm, newImagesArray, type = "response")))
-    print("Are the new images fraudulent? (0 is fraud 1 is not, ordered by images in file)")
+
     print(svmpredict)
+    
+    print("Are the new images fraudulent? (0 0 is fraud 1 1 is not, ordered by images in file (with GLM)")
+    print(system.time(glmpredict <-predict(fit, newdata=newImagesArray, type="response")))
+    
+    print(round(glmpredict))
+
   }
-  
-  
-  
+
 }
 
 # to add more images: set working directory to the two folders with names "tampered' and 'authentic'
@@ -341,7 +380,8 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, newImagesDir=
 # please, input the directory of the authentic and tampered training images as string:
 authenticDir <- "/Users/robinyancey/desktop/authentic"
 tamperDir <- "/Users/robinyancey/desktop/tampered"
-
+# authenticDir <- "/Users/robinyancey/desktop/Au"
+# tamperDir <- "/Users/robinyancey/desktop/Tp"
 # to increase the number of features per each of the 4 directions (and total features per channel)
 # increase 'pfeatures' variable below (increase V61 to V(4*pfeatures))
 
@@ -353,9 +393,10 @@ pfeatures <- 15
 
 # to test on a cluster, set par to the number of worker nodes (par <- 0 is serial)
 # NOTE: please, make sure the number of images is divisible by the cluster size
-par <- 4
+par <- 8
 
-newImagesDir <- "/Users/robinyancey/desktop/newImages"
+newImagesDir <- "/Users/robinyancey/desktop/newImagesDir"
 
-#print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par)))
 print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par, newImagesDir)))
+
+display(imageInCopy)
