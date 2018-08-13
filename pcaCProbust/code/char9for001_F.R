@@ -4,9 +4,9 @@ imageIn <- readImage("/Users/robinyancey/desktop/001_F.jpg")
 
 display(imageIn)
 
-Nf <- 5 #20 #87 the program prints row/column pairs of offset frequencies greater than Nf 
+Nf <- 5 # the program prints row/column pairs of offset frequencies greater than Nf 
 # adjust Nf up or down so that the # pairs printed  = # copied regions, larger copied regions should have higher Nf
-Nd <- 100  #280 # minimum offset distance of the matching block: increase as much as possible to remove any false
+Nd <- 100 # minimum offset distance of the matching block: increase as much as possible to remove any false
 # positives (boxesnot in the copied region)
 
 # user choices
@@ -14,11 +14,9 @@ dim3 <- 3 # 3 for color and 1 for b/w input image
 c <- 0 # color (0-255) of copied regions in output image
 boxside <- 16
 pfeatures <- 0
-# (will implement in parallel for this too very soon)
-par <- 4 # if 2,4,8, or 16 then image is split in chunks for parallel pca matrix computation, if 0 it runs in serial
-# for 512x512 image:  seconds if par=,  seconds if par=0 
-# note1: parallel version requires partools package 
-# note2: higher # of parallel clusters could result in a false positive occuring in the splitting line (see test images)
+
+par <- 4 # if 2,4,8 then image is split in chunks for parallel pca matrix computation, if 0 it runs in serial
+
 
 pcaCProbust<-function(imageIn,c=0,dim3=3,Nf=10,Nd=2,par=4,boxside=16,pfeatures=0){
   
