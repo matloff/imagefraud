@@ -188,7 +188,7 @@ imageFeatureVectors <-function(images, numImages, pfeatures){
 }
 
 
-testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newImagesDir=NULL){  
+testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest){  
   require(EBImage)
   require("e1071")
   require('partools')
@@ -392,10 +392,9 @@ pfeatures <- 15
 # NOTE: please, make sure the number of images is divisible by the cluster size
 par <- 8
 
-newImagesDir <- "/Users/robinyancey/desktop/newImagesDir"
 
 numTest <- 73
 
-print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par, numTest, newImagesDir)))
+print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par, numTest)))
 
 display(imageInCopy)
