@@ -1,4 +1,3 @@
-
 # this needs to be applied to each color space
 rlrnChannelVector <- function(imageIn,pfeatures){
   
@@ -123,7 +122,7 @@ rlrnChannelVector <- function(imageIn,pfeatures){
     }
   }
   
-
+  
   # multiply each column j by length j (each increment of the element represented 1 of that rl)
   testrlrn  <- testrlrn * t(c(1:pfeatures,1:pfeatures,1:pfeatures,1:pfeatures))
   
@@ -184,7 +183,7 @@ imageFeatureVectors <-function(images, numImages, pfeatures){
   
   imageFeatureArray <- imageFeatureArray[2:nrow(imageFeatureArray),]
   imageFeatureArray
-
+  
   
 }
 
@@ -196,32 +195,56 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newI
   require('e1071')
   
   setwd(authenticDir)
-  list.filenames<-list.files(pattern=".jpg$")
-  list.data<-list()
+  list.filenames<-list.files(pattern=".tif$")
+  list.data1<-list()
   
+  if (length(list.filenames) > 0){
   for (i in 1:length(list.filenames))
   {
-    list.data[[i]]<-readImage(list.filenames[i])
+    list.data1[[i]] <- readTIFF(list.filenames[i])
   }
+  }
+  images <- list.data1
+  list.filenames <-list.files(pattern=".jpg$")
+  #list.filenames <- c(list.filenames1, list.filenames2)
+  list.data2<-list()
   
-  numTrues <- length(list.data)
+  if (length(list.filenames) > 0){
+  for (i in 1:length(list.filenames))
+  {
+    list.data2[[i]]<-readImage(list.filenames[i])
+  }
+  }
+  numTrues <- length(list.data1) + length(list.data2)
   print('Number of UNtampered images in data set:')
   print(numTrues)
-  images <- list.data
+  images <- c(images, list.data2)
   
+
   setwd(tamperDir)
-  list.filenames<-list.files(pattern=".jpg$")
-  list.data<-list()
+  list.filenames<-list.files(pattern=".tif$")
+  list.data1<-list()
   
+  if (length(list.filenames) > 0){
   for (i in 1:length(list.filenames))
   {
-    list.data[[i]]<-readImage(list.filenames[i])
+    list.data1[[i]] <- readTIFF(list.filenames[i])
   }
-  
-  numFalses <- length(list.data)
+  }
+  images <- c(images, list.data1)
+  list.filenames <-list.files(pattern=".jpg$")
+  #list.filenames <- c(list.filenames1, list.filenames2)
+  list.data2<-list()
+  if (length(list.filenames) > 0){
+  for (i in 1:length(list.filenames))
+  {
+    list.data2[[i]]<-readImage(list.filenames[i])
+  }
+  }
+  numFalses <- length(list.data1) + length(list.data2)
   print('Number of tampered images in data set:')
   print(numFalses)
-  images <- c(images, list.data)
+  images <- c(images, list.data2)
   print('Number of images in total:')
   numImages <- length(images)
   print(numImages)
@@ -230,7 +253,12 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newI
   # # 1 is copied 0 is not copied
   truthVector <- t(c(rep(1,numTrues*2), rep(0,numFalses*2)))
   truthVector <- t(truthVector)
-
+  
+  if (par > 1){
+    imagesPerNode <- round(numImages/par)
+    truthVector <- truthVector[1:(2 * imagesPerNode * par)]
+    }
+  
   
   print("Time it takes to compute RLRN feature vectors:")
   if (par == 0) {
@@ -239,7 +267,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newI
   if (par > 1){
     cls <- makeCluster(par)
     clusterEvalQ(cls, require(EBImage))
-    imagesPerNode <- round(numImages/par)
+    #imagesPerNode <- round(numImages/par)
     clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode"), envir=environment())
     
     listimages <- list()
@@ -261,7 +289,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newI
   names(allImagesArray) <- c(1:(pfeatures*4),'truths')
   allImagesArray$truths <- as.factor(allImagesArray$truths)
   
-
+  
   print("Feature vectors in test set:")
   print(numTest)
   testidxs <- sample(1:nrow(allImagesArray),numTest)
@@ -304,7 +332,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newI
     svmpredictC <- clusterEvalQ(cls, svmpredictT <- t(svmpredict))
     predictsvmC <-Reduce('+', svmpredictC) / par # Software Alchemy
     predictsvmC <-round(predictsvmC-1)
-
+    
     print("Parallel SVM Output as Confusion Matrix")
     #print(table(pred=as.vector(predictsvmC), true=test$truths))
     print(table(pred=as.vector(predictsvmC), true=testTrue))
@@ -328,7 +356,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newI
     print(system.time(mysvm <- svm(truths ~., data = train, gamma = tune$best.parameters$gamma, cost = tune$best.parameters$cost)))
     #print(summary(mysvm))
     print(system.time(svmpredict <- predict(mysvm, test, type = "response")))
-
+    
     print("Serial SVM Output as Confusion Matrix")
     print(table(pred=svmpredict, true=testTrue))
     
@@ -338,44 +366,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest, newI
     #     0 1911   68
     #     1  324 7697
   }
-  
-  if (!is.null(newImagesDir)) {
-    
-    setwd(newImagesDir)
-    list.filenames<-list.files(pattern=".jpg$")
-    list.data<-list()
-    
-    for (i in 1:length(list.filenames))
-    {
-      list.data[[i]]<-readImage(list.filenames[i])
-    }
-    
-    numTestNew <- length(list.data)
-    print('Number of new images to test:')
-    print(numTestNew)
-    newImages <- list.data
-    truthVector <- t(c(rep(0,numTestNew*2)))
-    truthVector <- t(truthVector)
-    newImagesArray <- imageFeatureVectors(newImages, numTestNew, pfeatures)
-    
-    #display(imageInCopy)
-    newImagesArray <- cbind(newImagesArray, truthVector)
-    newImagesArray <- as.data.frame(newImagesArray)
-    names(newImagesArray) <- c(1:(pfeatures*4),'truths')
-    newImagesArray$truths <- as.factor(newImagesArray$truths)
-    
-    print("Are the new images fraudulent? (0 0 is fraud 1 1 is not, ordered by images in file (with SVM)")
-    print(system.time(svmpredict <- predict(mysvm, newImagesArray, type = "response")))
-
-    print(svmpredict)
-    
-    print("Are the new images fraudulent? (0 0 is fraud 1 1 is not, ordered by images in file (with GLM)")
-    print(system.time(glmpredict <-predict(fit, newdata=newImagesArray, type="response")))
-    
-    print(round(glmpredict))
-
-  }
-
+   
 }
 
 # to add more images: set working directory to the two folders with names "tampered' and 'authentic'
