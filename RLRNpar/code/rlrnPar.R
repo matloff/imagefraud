@@ -192,59 +192,95 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest){
   require(EBImage)
   require("e1071")
   require('partools')
-  require('e1071')
+  require(tiff)
   
   setwd(authenticDir)
+  
   list.filenames<-list.files(pattern=".tif$")
   list.data1<-list()
   
   if (length(list.filenames) > 0){
-  for (i in 1:length(list.filenames))
-  {
-    list.data1[[i]] <- readTIFF(list.filenames[i])
-  }
+    for (i in 1:length(list.filenames))
+    {
+      list.data1[[i]] <- readTIFF(list.filenames[i])
+    }
   }
   images <- list.data1
+  
+  
   list.filenames <-list.files(pattern=".jpg$")
-  #list.filenames <- c(list.filenames1, list.filenames2)
   list.data2<-list()
   
   if (length(list.filenames) > 0){
-  for (i in 1:length(list.filenames))
-  {
-    list.data2[[i]]<-readImage(list.filenames[i])
+    for (i in 1:length(list.filenames))
+    {
+      list.data2[[i]]<-readImage(list.filenames[i])
+    }
   }
-  }
-  numTrues <- length(list.data1) + length(list.data2)
-  print('Number of UNtampered images in data set:')
-  print(numTrues)
   images <- c(images, list.data2)
   
-
+  list.filenames <-list.files(pattern=".png$")
+  list.data3<-list()
+  
+  if (length(list.filenames) > 0){
+    for (i in 1:length(list.filenames))
+    {
+      list.data3[[i]]<-readImage(list.filenames[i])
+    }
+  }
+  images <- c(images, list.data3)
+  
+  numTrues <- length(list.data1) + length(list.data2) + length(list.data3)
+  print('Number of UNtampered images in data set:')
+  print(numTrues)
+  
+  
+  
+  
+  
+  
+  
   setwd(tamperDir)
+  
   list.filenames<-list.files(pattern=".tif$")
   list.data1<-list()
   
   if (length(list.filenames) > 0){
-  for (i in 1:length(list.filenames))
-  {
-    list.data1[[i]] <- readTIFF(list.filenames[i])
+    for (i in 1:length(list.filenames))
+    {
+      list.data1[[i]] <- readTIFF(list.filenames[i])
+    }
   }
-  }
+  
   images <- c(images, list.data1)
+  
   list.filenames <-list.files(pattern=".jpg$")
-  #list.filenames <- c(list.filenames1, list.filenames2)
   list.data2<-list()
+  
   if (length(list.filenames) > 0){
-  for (i in 1:length(list.filenames))
-  {
-    list.data2[[i]]<-readImage(list.filenames[i])
+    for (i in 1:length(list.filenames))
+    {
+      list.data2[[i]]<-readImage(list.filenames[i])
+    }
   }
+  images <- c(images, list.data2)
+  
+  list.filenames <-list.files(pattern=".png$")
+  list.data3<-list()
+  
+  if (length(list.filenames) > 0){
+    for (i in 1:length(list.filenames))
+    {
+      list.data3[[i]]<-readImage(list.filenames[i])
+    }
   }
-  numFalses <- length(list.data1) + length(list.data2)
+  images <- c(images, list.data3)
+  
+  numFalses <- length(list.data1) + length(list.data2) + length(list.data3)
   print('Number of tampered images in data set:')
   print(numFalses)
-  images <- c(images, list.data2)
+  
+  
   print('Number of images in total:')
   numImages <- length(images)
   print(numImages)
@@ -253,13 +289,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest){
   # # 1 is copied 0 is not copied
   truthVector <- t(c(rep(1,numTrues*2), rep(0,numFalses*2)))
   truthVector <- t(truthVector)
-  
-  if (par > 1){
-    imagesPerNode <- round(numImages/par)
-    truthVector <- truthVector[1:(2 * imagesPerNode * par)]
-    }
-  
-  
+
   print("Time it takes to compute RLRN feature vectors:")
   if (par == 0) {
     print(system.time(allImagesArray <- imageFeatureVectors(images, numImages, pfeatures)))}
@@ -267,7 +297,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest){
   if (par > 1){
     cls <- makeCluster(par)
     clusterEvalQ(cls, require(EBImage))
-    #imagesPerNode <- round(numImages/par)
+    imagesPerNode <- round(numImages/par)
     clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode"), envir=environment())
     
     listimages <- list()
@@ -366,7 +396,7 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest){
     #     0 1911   68
     #     1  324 7697
   }
-   
+  
 }
 
 # to add more images: set working directory to the two folders with names "tampered' and 'authentic'
@@ -374,10 +404,10 @@ testRLRNpar <- function(authenticDir, tamperDir, pfeatures, par=4, numTest){
 
 # First paper: used the whole database (apparently)
 # please, input the directory of the authentic and tampered training images as string:
-authenticDir <- "/Users/robinyancey/desktop/authentic"
-tamperDir <- "/Users/robinyancey/desktop/tampered"
-# authenticDir <- "/Users/robinyancey/desktop/Au"
-# tamperDir <- "/Users/robinyancey/desktop/Tp"
+# authenticDir <- "/Users/robinyancey/desktop/authentic"
+# tamperDir <- "/Users/robinyancey/desktop/tampered"
+authenticDir <- "/Users/robinyancey/desktop/Au1"
+tamperDir <- "/Users/robinyancey/desktop/Tp1"
 
 # to increase the number of features per each of the 4 directions (and total features per channel)
 # increase 'pfeatures' variable below (increase V61 to V(4*pfeatures))
@@ -393,7 +423,7 @@ pfeatures <- 15
 par <- 8
 
 
-numTest <- 73
+numTest <- 70
 
 print(system.time(testRLRNpar(authenticDir, tamperDir, pfeatures, par, numTest)))
 
