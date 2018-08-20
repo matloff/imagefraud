@@ -15,3 +15,8 @@ Results:
 Using 10 test images , copied regions are located in each image.
 
 These (Initial) test image outputs are located in the folder.
+
+How it works:
+
+This is an experimental method I made up (based on the RLRN 0/1 tampered/not code) and fact that theoretically tampered
+regions themselves should be what will produce different image features if the detection accuracy on the whole image is so high.
