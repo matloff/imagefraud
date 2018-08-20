@@ -9,8 +9,8 @@ V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou: "An Evaluation of
 IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
 
 Features that will be added VERY SOON:
-Images but more features will be added to test this on smaller images (with smaller blocks) and to use smaller blocks within
-the large blocks to further identify the exact shape of the tampering.
+More features will be added to test this on smaller images (with smaller blocks) and to use smaller blocks within
+the large blocks to further identify the exact shape of the tampering (since tests show this works as well).
 
 How to use: input the tampered and authentic directory folder file paths, and number of features (as in the original RLRNpar.R) BUT make sure each image corresponds exactly in order with its tampered version and authentic version in each folder. For example, number each authetic image as the same name as the tampered version. (I will try to upload folders of test images for each RLRN code). Use these to train and then input numTest as a smaller number than the train set (# imagges in each folder).
 
