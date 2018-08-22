@@ -15,7 +15,7 @@ the large blocks to further identify the exact shape of the tampering (since tes
 How to use: input the tampered and authentic directory folder file paths, and number of features (as in the original RLRNpar.R) BUT make sure each image corresponds exactly in order with its tampered version and authentic version in each folder. For example, number each authetic image as the same name as the tampered version. (I will try to upload folders of test images for each RLRN code). Use these to train and then a value for input numTest as a smaller number than the train set (# images in each folder). Additionally, add another file folder path which will be used by the program to store your testbimages with both the predicted localized region and the actual localized region (for comparison).
 
 Results:
-Using 10 test images , copied regions are located by exactly covering the tampered region with black boxes or mostly in each image.
+Using 10 test images and all 48 images (accept a few not over 1024x1024) in the database for training, copied regions are located by exactly covering the tampered region with black boxes or mostly in each image.
 
 An example output is located in the outputImages folder.
 
