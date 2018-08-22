@@ -276,33 +276,7 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
     allNodeBlocks <- rbind(allNodeBlocks, nodeBlocks)
     }
   }
-  
-  # cls <- makeCluster(par)
-  # clusterEvalQ(cls, require(EBImage))
-  # imagesPerNode <- round(numFalses/par)
-  # clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode"), envir=environment())
-  # 
-  # listimages1 <- list()
-  # listimages2 <- list()
-  # for (i in 1:par){
-  #   listimages1[i]<-list(images_t[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
-  #   listimages2[i]<-list(images_a[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
-  # }
-  # 
-  # clusterApply(cls, listimages1, function(m) {nodeImages1 <<- m; NULL})
-  # clusterApply(cls, listimages2, function(m) {nodeImages2 <<- m; NULL})
-  # 
-  # #print(system.time(allImagesArrayC <- clusterEvalQ(cls, allImagesArrayC <- imageFeatureVectors(nodeImages, imagesPerNode, pfeatures))))
-  # #allImagesArray <- do.call('rbind',allImagesArrayC)
-  
-  # for (i in 1:imagesPerNode){
-  #     
-  #     nodeBlocks <- clusterEvalQ(cls, nodeBlocks <- blockMatrix(nodeImages1[i], nodeImages2[i]))
-  #     
-  #     list.data[[i]] <- clusterEvalQ(cls, list.data[[i]]<-nodeBlocks)
-  #     
-  #     allNodeBlocks <- rbind(allNodeBlocks, nodeBlocks)
-  #   }
+ 
   
   
   locs <- allNodeBlocks[2:nrow(allNodeBlocks),62:63]
@@ -432,14 +406,11 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
   }
   
 }
-#authenticDir <- "/Users/robinyancey/desktop/originals"
-#tamperDir <- "/Users/robinyancey/desktop/spliced"
+authenticDir <- "/Users/robinyancey/desktop/originals"
+tamperDir <- "/Users/robinyancey/desktop/spliced"
 
-authenticDir <- "/Users/robinyancey/desktop/large_orig"
-tamperDir <- "/Users/robinyancey/desktop/large_copy"
+outputDir <- "/Users/robinyancey/desktop/outputImages"
 
-#outputDir <- "/Users/robinyancey/desktop/outputImages"
-outputDir <- "/Users/robinyancey/desktop/outputImages2"
 
 pfeatures <- 15
 numTest <- 10
