@@ -216,7 +216,7 @@ imageFeatureVectors <-function(images, numImages, pfeatures){
 }
 
 
-testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTest){  
+testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures=15, numTest=1, thresh=0){  
   
   require(EBImage)
   require('partools')
@@ -255,6 +255,32 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
   numImages <- length(images_t) + length(images_a)
   print(numImages)
   
+  # cls <- makeCluster(par)
+  # clusterEvalQ(cls, require(EBImage))
+  # imagesPerNode <- round(numFalses/par)
+  # clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode", "blockMatrixC","blockMatrix"), envir=environment())
+  # 
+  # listimages1 <- list()
+  # listimages2 <- list()
+  # for (i in 1:par){
+  #   listimages1[i]<-list(images_t[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
+  #   listimages2[i]<-list(images_a[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
+  # }
+  # 
+  # clusterApply(cls, listimages1, function(m) {nodeImages1 <<- m; NULL})
+  # clusterApply(cls, listimages2, function(m) {nodeImages2 <<- m; NULL})
+  # 
+  # #print(system.time(allImagesArrayC <- clusterEvalQ(cls, allImagesArrayC <- imageFeatureVectors(nodeImages, imagesPerNode, pfeatures))))
+  #blockMatrixC <-function(nodeImages1[i], nodeImages2[i])){
+  #nodeBlocks <- blockMatrix(imageIn_t, imageIn_a)
+  
+  #list.data[[i]]<-nodeBlocks
+  
+  #allNodeBlocks <- rbind(allNodeBlocks, nodeBlocks)
+  
+  
+ # }
+
   allNodeBlocks <- matrix(0, nrow=1, ncol=((pfeatures*4)+3))  
   list.data<-list()
   for (i in 1:numFalses){
@@ -275,7 +301,33 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
     allNodeBlocks <- rbind(allNodeBlocks, nodeBlocks)
     }
   }
- 
+  
+  # cls <- makeCluster(par)
+  # clusterEvalQ(cls, require(EBImage))
+  # imagesPerNode <- round(numFalses/par)
+  # clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode", "blockkMatrixC"), envir=environment())
+  # 
+  # listimages1 <- list()
+  # listimages2 <- list()
+  # for (i in 1:par){
+  #   listimages1[i]<-list(images_t[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
+  #   listimages2[i]<-list(images_a[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
+  # }
+  # 
+  # clusterApply(cls, listimages1, function(m) {nodeImages1 <<- m; NULL})
+  # clusterApply(cls, listimages2, function(m) {nodeImages2 <<- m; NULL})
+  # 
+  # #print(system.time(allImagesArrayC <- clusterEvalQ(cls, allImagesArrayC <- imageFeatureVectors(nodeImages, imagesPerNode, pfeatures))))
+  # #allImagesArray <- do.call('rbind',allImagesArrayC)
+  
+  # for (i in 1:imagesPerNode){
+  #     
+  #     nodeBlocks <- blockMatrix(nodeImages1[i], nodeImages2[i])
+  #     
+  #     list.data[[i]] <-nodeBlocks)
+  #     
+  #     allNodeBlocks <- rbind(allNodeBlocks, nodeBlocks)
+  #   }
   
   
   locs <- allNodeBlocks[2:nrow(allNodeBlocks),62:63]
@@ -298,7 +350,6 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
     
     setwd(outputDir)
     
-    
     oneImageArray <- list.data[[j]][,1:61]
     locs <- list.data[[j]][,62:63]
     imageIn_t <- images_t[[j]]
@@ -307,8 +358,6 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
     print(width)
     height<- ncol(images_t[[j]])
     
-    
-
   if (width > 1024 && height > 1024 ) {    
      
     oneImageArray <- as.data.frame(oneImageArray)
@@ -322,13 +371,13 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
     print(system.time(glmpredict <-predict(fit, newdata=test, type="response")))
     
     boxside <- 512
-    tamperedinds <- which(round(glmpredict) == 0, arr.ind=TRUE)
+    tamperedinds <- which(round(glmpredict-thresh) == 0, arr.ind=TRUE)
     
     if (length(tamperedinds) > 1){ 
 
       pairs<-locs[tamperedinds,]
 
-      for (i in 1:2){
+      for (i in 1:length(tamperedinds)){
         
        rEnd<- (pairs[i,1]+boxside - 1)
        cEnd<- (pairs[i,2]+boxside - 1)
@@ -413,7 +462,8 @@ outputDir <- "/Users/robinyancey/desktop/outputImages"
 
 pfeatures <- 15
 numTest <- 10
+thresh <- 0.1
 
-print(system.time(testRLRNblocks(authenticDir, tamperDir, outputDir, pfeatures, numTest)))
+print(system.time(testRLRNblocks(authenticDir, tamperDir, outputDir, pfeatures, numTest, thresh)))
 
 display(imageInCopy)
