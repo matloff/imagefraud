@@ -7,7 +7,7 @@ RLRNpar folder: This is code uses a chroma-based method of feature analysis usin
 pcaCProbust folder: contains a working combined intensity based and PCA algorithm (under the colder folder) for image fraud,
 as well as multiple test images and output (see README with subdirectory for more information)
  
- - NOTE: please, use this code for localizing the actual copied region as it is the fastest, easiest to use and most accurate
+ - NOTE: please, use this code for localizing the actual copied region (of images with copy-paste forgery) as it is the fastest, easiest to use and most accurate
  
 RLRNlocalization folder: contains an experimental working code for localizing tampered regions based on RLRN (see README with subdirectory for more information)
 
