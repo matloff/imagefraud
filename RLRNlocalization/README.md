@@ -8,9 +8,10 @@ Use the "scaled down version" of the original and 1-1 spliced image databases fr
 V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou: "An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
 IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
 
-I uploaded the folders with the images in proper format (see below), into this directory.
+I uploaded the folders with the images in proper format, into this directory.
 
 The code file also includes example optional inputs for pfeatures and thresh (increasing thresh will increase the number of boxes covering the tampered region if 1 or none were found in a large tampered region).
+
 
 Features that will be added VERY SOON:
 More features will be added to test this on smaller images (with smaller blocks) and to use smaller blocks within
