@@ -18,5 +18,6 @@ as well as multiple test images and output (see README with subdirectory for mor
 
 # NEXT TASK:
 
-(Finish) implementing the paper here (which also uses blocking and database model training, but a more sophisiticated method of feature generation for) and compare this to RLRN (and/or use it for improving it)
+(Finish) implementing the paper here:https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7084319
+(which also uses blocking and database model training, but a more sophisiticated method of feature generation for) and compare this to RLRN (and/or use it for improving it)
 
