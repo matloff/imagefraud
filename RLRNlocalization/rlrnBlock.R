@@ -262,8 +262,7 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
     width <- nrow(images_t[[i]])
     height<- ncol(images_t[[i]])
     
-    if (width > 1000 && height > 1000 ) {
-    #if (width > 1024 && height > 1024 ) {      
+    if (width > 1024 && height > 1024 ) {      
     
     imageIn_t <- images_t[[i]]
     imageIn_a <- images_a[[i]]
@@ -309,8 +308,8 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures, numTes
     height<- ncol(images_t[[j]])
     
     
-   if (width > 1000 && height > 1000 ) {
-  #if (width > 1024 && height > 1024 ) {    
+
+  if (width > 1024 && height > 1024 ) {    
      
     oneImageArray <- as.data.frame(oneImageArray)
     names(oneImageArray) <- c(1:(pfeatures*4),'truths')
