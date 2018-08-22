@@ -16,4 +16,5 @@ RLRNlocalization folder: contains an experimental working code for localizing ta
 dctCPtested folder: contains a working DCT quantization algorithm (under the colder folder) for copy-paste image fraud,
 as well as multiple test images and output (see README with subdirectory for more information)
 
+# NEXT TASK in Image Fraud Detection: (Finish) implementing the paper here (which also uses blocking and database model training, but a more sophisiticated method of feature generation for) and compare this to RLRN
 
