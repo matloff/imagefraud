@@ -23,6 +23,6 @@ An example output is located in the example_output_images folder.
 How it works:
 
 This is an experimental method I made up (based on the RLRN 0/1 tampered/not code) and fact that theoretically tampered
-regions themselves should be what will produce different (tampered) image features if the detection accuracy on the whole image is 98% on the whole image as shown in RLRNpar.R.
+regions themselves should be what will produce different (tampered) image features (if the detection accuracy on the whole image is 98% on the whole image as shown in RLRNpar.R.)
 
 
