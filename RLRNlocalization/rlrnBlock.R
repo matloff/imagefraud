@@ -192,7 +192,6 @@ imageFeatureVectors <-function(images, numImages, pfeatures){
 #  for (i in 1:numImages){
     imageIn <- images
     
-    #print(dim(imageIn))
     # Cb color space
     red.weight<- -0.299; green.weight <- -0.587; blue.weight <-  0.886
     imageInCb <- red.weight * imageData(imageIn)[,,1] + green.weight * imageData(imageIn)[,,2] + blue.weight  * imageData(imageIn)[,,3]
@@ -230,7 +229,6 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures=15, num
     list.data[[i]]<-readImage(list.filenames[i])
   }
   
-
   numTrues <- length(list.data)
   print('Number of UNtampered images in data set:')
   print(numTrues)
@@ -255,31 +253,6 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures=15, num
   numImages <- length(images_t) + length(images_a)
   print(numImages)
   
-  # cls <- makeCluster(par)
-  # clusterEvalQ(cls, require(EBImage))
-  # imagesPerNode <- round(numFalses/par)
-  # clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode", "blockMatrixC","blockMatrix"), envir=environment())
-  # 
-  # listimages1 <- list()
-  # listimages2 <- list()
-  # for (i in 1:par){
-  #   listimages1[i]<-list(images_t[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
-  #   listimages2[i]<-list(images_a[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
-  # }
-  # 
-  # clusterApply(cls, listimages1, function(m) {nodeImages1 <<- m; NULL})
-  # clusterApply(cls, listimages2, function(m) {nodeImages2 <<- m; NULL})
-  # 
-  # #print(system.time(allImagesArrayC <- clusterEvalQ(cls, allImagesArrayC <- imageFeatureVectors(nodeImages, imagesPerNode, pfeatures))))
-  #blockMatrixC <-function(nodeImages1[i], nodeImages2[i])){
-  #nodeBlocks <- blockMatrix(imageIn_t, imageIn_a)
-  
-  #list.data[[i]]<-nodeBlocks
-  
-  #allNodeBlocks <- rbind(allNodeBlocks, nodeBlocks)
-  
-  
- # }
 
   allNodeBlocks <- matrix(0, nrow=1, ncol=((pfeatures*4)+3))  
   list.data<-list()
@@ -302,34 +275,6 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures=15, num
     }
   }
   
-  # cls <- makeCluster(par)
-  # clusterEvalQ(cls, require(EBImage))
-  # imagesPerNode <- round(numFalses/par)
-  # clusterExport(cls, varlist=c('imageFeatureVectors', 'rlrnChannelVector', "pfeatures", "imagesPerNode", "blockkMatrixC"), envir=environment())
-  # 
-  # listimages1 <- list()
-  # listimages2 <- list()
-  # for (i in 1:par){
-  #   listimages1[i]<-list(images_t[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
-  #   listimages2[i]<-list(images_a[(imagesPerNode*(i-1)+1):(imagesPerNode*i)])
-  # }
-  # 
-  # clusterApply(cls, listimages1, function(m) {nodeImages1 <<- m; NULL})
-  # clusterApply(cls, listimages2, function(m) {nodeImages2 <<- m; NULL})
-  # 
-  # #print(system.time(allImagesArrayC <- clusterEvalQ(cls, allImagesArrayC <- imageFeatureVectors(nodeImages, imagesPerNode, pfeatures))))
-  # #allImagesArray <- do.call('rbind',allImagesArrayC)
-  
-  # for (i in 1:imagesPerNode){
-  #     
-  #     nodeBlocks <- blockMatrix(nodeImages1[i], nodeImages2[i])
-  #     
-  #     list.data[[i]] <-nodeBlocks)
-  #     
-  #     allNodeBlocks <- rbind(allNodeBlocks, nodeBlocks)
-  #   }
-  
-  
   locs <- allNodeBlocks[2:nrow(allNodeBlocks),62:63]
   allImagesArray <- allNodeBlocks[2:nrow(allNodeBlocks),1:61]
   
@@ -343,7 +288,6 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures=15, num
 
   print(system.time(fit <- glm(truths ~., data=train, family=binomial())))
   # summary(fit) see warning on sticky note
-  
   
   
   for (j in 1:numTest){
@@ -406,7 +350,6 @@ testRLRNblocks <- function(authenticDir, tamperDir, outputDir, pfeatures=15, num
         imageIn_t[pairs[1]:rEnd, pairs[2]:cEnd,1:3] = c
       
     }
-    
     
     name <- paste(j, "predicted", sep="_")
     png(filename=name)
