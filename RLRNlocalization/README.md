@@ -3,7 +3,7 @@ Use this code to localize tampered regions of the image using RLRN.
 
 How to use: input the tampered and authentic directory folder file paths, and number of features (as in the original RLRNpar.R) BUT make sure each image corresponds exactly in order with its tampered version and authentic version in each folder. For example, number each authetic image as the same name as the tampered version. Use these to train and then a value for input numTest as a smaller number than the train set (# images in each folder). Additionally, add another file folder path which will be used by the program to store your testbimages with both the predicted localized region and the actual localized region (for comparison).
 
-Use the "scaled down version" of the original and 1-1 spliced image databases from: https://www5.cs.fau.de/research/data/image-manipulation/
+Use the "scaled down version" of the original and spliced image databases from: https://www5.cs.fau.de/research/data/image-manipulation/
 
 V. Christlein, C. Riess, J. Jordan, C. Riess, E. Angelopoulou: "An Evaluation of Popular Copy-Move Forgery Detection Approaches", 
 IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841-1854, 2012.
