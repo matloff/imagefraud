@@ -19,7 +19,7 @@ IEEE Transactions on Information Forensics and Security, vol. 7, no. 6, pp. 1841
 
 4. The code file also includes example optional inputs for pfeatures (which is stiil the number of run lengths) and thresh (increasing thresh will increase the number of boxes covering the tampered region if 1 or none were found in a large tampered region).
 
-5. Par is (again) the number of parallel workers to distribute groups of images to compute RLRN feature vectors. Please, make sure the number of images is divisible by the number of workers.
+5. Par is (again) the number of parallel workers to distribute groups of images to compute RLRN feature vectors. Please, make sure the number of images is divisible by the number of workers. Note: (at the time) application memory could run out with a cluster size greater than 4.
 
 
 
