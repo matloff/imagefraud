@@ -2,6 +2,8 @@ Use this code to localize tampered regions of the image using RLRN.
 
 
 How to use:
+
+
 1.input the tampered (tamperedDir) and authentic (authenticDir) directory folder file paths, and number of features (as in the original RLRNpar.R) BUT make sure each image corresponds exactly in order with its tampered version and authentic version in each folder. For example, number each authetic image as the same name as the tampered version. 
 
 2. Use these to train and then a value for input numTest as a smaller number than the train set (# images in each folder). 
