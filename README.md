@@ -6,7 +6,7 @@ RLRNpar folder: This is code uses a chroma-based method of feature analysis usin
  
 BAGlocalization folder: This code uses the Block Artifact Grid to measure differences in the compression rate and quality factor of image blocks used in JPEG compression. Those blocks with a different factor are highlighted in red/yellow in the output heat map.
 
--NOTE: please, use this code to localize tampered regions of an imaged that is determined by RLRNpar.R to be spliced by inserting a piece of another image (not by copy-paste from the same image).
+- NOTE: please, use this code to localize tampered regions of an imaged that is determined by RLRNpar.R to be spliced by inserting a piece of another image (not by copy-paste from the same image).
 
 pcaCProbust folder: contains a working combined intensity based and PCA algorithm (under the colder folder) for image fraud,
 as well as multiple test images and output (see README with subdirectory for more information)
