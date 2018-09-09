@@ -55,7 +55,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   if (Q<50){S <- 5000/Q}
   T <- round((((T*S)+50)/100))
   
-  dctMatrix <- function(imageIn){
+  dctMatrix2 <- function(imageIn){
     require('dtt')
     imageIn <-as.matrix(imageIn) # distribsplit changes it to dataframe (which is not acceptable by dvtt)
     width <- nrow(imageIn)
@@ -81,7 +81,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   if (par>0){
     require('partools') 
     cls <-makeCluster(par)
-    clusterExport(cls, varlist=c('dctMatrix',"T", "boxside", "height"), envir=environment())
+    clusterExport(cls, varlist=c('dctMatrix2',"T", "boxside", "height"), envir=environment())
     clusterEvalQ(cls, require('dtt'))
     distribsplit(cls, 'imageIn')
     
@@ -100,7 +100,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
     # # #
 
     
-    testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix(imageIn))
+    testdctC <- clusterEvalQ(cls, testdctC <- dctMatrix2(imageIn))
     
     # need to correct i, j locations so add width/(cls[[n]]$rank-1) to i 
     for (i in 2:length(cls)){ 
@@ -112,7 +112,7 @@ dctCP<-function(imageIn,c=0,par=4,Nf=10,Nd=2,Q=50,boxside=8){
   
   ### Serial:
   if (par==0){
-    testdct <- dctMatrix(imageIn)}
+    testdct <- dctMatrix2(imageIn)}
   
   # rewrite size since was divided on cls (shorter since misses rows of overlapping boxes)
   size <- dim(testdct)[1]
