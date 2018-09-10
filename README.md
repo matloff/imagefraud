@@ -22,3 +22,9 @@ as well as multiple test images and output (see README with subdirectory for mor
 
 
 
+# NEXT TASKS:
+
+There are lots of improvements that can be made to the Block Artifact Grid method and lots of research out on this. I would like to research use of methods to improve this such as first digit probability distribution features, MLE, and local noise discrepancies.
+
+Implement the paper here: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7084319
+(which also uses blocking and database model training, but a more sophisticated method of feature generation) and compare this to RLRN (and/or use it for improving it)
