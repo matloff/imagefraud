@@ -53,7 +53,7 @@ BAGlocalization <- function(image){
   rows <- c(1,2,1,1,2,3,4,3,2,1,1,2,3,4,5,6,5,4,3,2,1,1,2,3,4,5,6,7,8,7,6,5)
   cols <- c(1,1,2,3,2,1,1,2,3,4,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4)
   
-  for (coeff in 1:32){  
+  for (coeff in 2:32){  
     none <- F # in case there are no peaks
     
     row <- rows[coeff]
@@ -75,10 +75,10 @@ BAGlocalization <- function(image){
     }
     # low pass filter and remove positive values    
     options('smoother.gaussianwindow.alpha'=6,'smoother.window'=45, 'smoother.tails'=T)
-    filter2  <- smth.gaussian(secondDiff, window = getOption("smoother.window"), alpha = getOption("smoother.gaussianwindow.alpha"),tails = getOption("smoother.tails"))
-    filter2[ filter2 > min(filter2)/10 ] <- 0
+    filter  <- smth.gaussian(secondDiff, window = getOption("smoother.window"), alpha = getOption("smoother.gaussianwindow.alpha"),tails = getOption("smoother.tails"))
+    filter[ filter > min(filter)/10 ] <- 0
     
-    ext <- extrema(filter2)
+    ext <- extrema(filter)
     
     if (!none){
     # the number of extreme values in the filtered histogram of DCT can be used to find the 
