@@ -1,5 +1,7 @@
 library(regtools)
 
+# This function was just for me to see the digits and is not used
+# in the classification.
 plotImage <- function(imageAsRow,imageHeight=imageHeight,imageWidth=imageWidth) {
     # Must be done for MNIST because apparently the
     # MNIST as a data.frame is characters, not integers.
@@ -14,24 +16,6 @@ plotImage <- function(imageAsRow,imageHeight=imageHeight,imageWidth=imageWidth) 
 
     image(imageToPlot)
 }
-
-# Calculates three features in the horizontal direction in the
-# first half of the digit's bounding box.
-# calculateFirstHorizontalFeatures <- function(imageAsRow) {
-
-# }
-
-# # Calculates three features in the horizontal direction in the
-# # second half of the digit's bounding box.
-# calculateSecondHorizontalFeatures <- function(imageAsRow) {
-
-# }
-
-# # Calculates three features in the vertical direction in the
-# # digit's entire bounding box.
-# calculateVerticalFeatures <- function(imageAsRow) {
-
-# }
 
 # Returns the nine features for the given image.
 # Given image should be a ROW of pixels.
@@ -239,32 +223,13 @@ computeSetFeatures <- function(imagesAsRows,imageHeight,imageWidth,numPixelsPerI
 }
 
 trainClassifier <- function(trainingSetFeatures) {
-    # Based on similar code from: https://stats.idre.ucla.edu/r/dae/multinomial-logistic-regression/
-    # library(nnet)
-    # trainingSetFeatures$truths2 <- relevel(trainingSetFeatures$truths,
-    #                                        ref="0")  # make "0" the baseline class
-    # fit <- multinom(truths2 ~ fh1_top + fh2_top + fh3_top
-    #                         + fh1_bot + fh2_bot + fh3_bot
-    #                         + fv1 + fv2 + fv3,
-    #                 data = trainingSetFeatures,
-    #                 trace=FALSE)  # trace=FALSE suppresses output
-    # return(fit)
-
     ologout <- ovalogtrn(10, trainingSetFeatures)
     return(ologout)
 }
 
 # Returns predicted labels.
 generatePredictions <- function(classifier,testSetFeatures) {
-    # predictions <- predict(classifier, newdata=testSetFeatures, "probs")
     predictedLabels <- ovalogpred(classifier,testSetFeatures[,1:9])
-    # predictedLabels <- c()
-    # for (rowIndex in 1:nrow(predictions))
-    # {
-    #     tmp <- (as.integer(
-    #         which(predictions[rowIndex,] == max(predictions[rowIndex,]))) - 1)
-    #     predictedLabels <- c(predictedLabels, tmp)
-    # }
     return(predictedLabels)
 }
 
@@ -283,13 +248,13 @@ secondSet <- function(trainingDataPath,testDataPath,
     testMNIST <- loadData(trainingDataPath,(numTrainingSamples+1),numTestSamples)
     testSetFeatures <- computeSetFeatures(
         testMNIST,imageHeight,imageWidth,numPixelsPerImage)
-    print("True labels: ")
-    print(testMNIST$y)
+    # print("True labels: ")
+    # print(testMNIST$y)
 
     fit <- trainClassifier(trainingSetFeatures)
     predictedLabels <- generatePredictions(fit,testSetFeatures)
-    print("Predicted labels: ")
-    print(predictedLabels)
+    # print("Predicted labels: ")
+    # print(predictedLabels)
 
     print("Accuracy: ")
     print(computeAccuracy(testMNIST$y, predictedLabels))
@@ -298,19 +263,16 @@ secondSet <- function(trainingDataPath,testDataPath,
     print(computeConfusionMatrix(testMNIST$y, predictedLabels))
 }
 
-runWithMNIST <- function() {
+runWithMNIST <- function(trainingDataPath="../kaggle_mnist/train.csv",
+						 testDataPath="../kaggle_mnist/test.csv") {
     # Specific to the MNIST data set.
     imageHeight <- 28
     imageWidth <- 28
     numPixelsPerImage <- 784
-    trainingDataPath <- "../kaggle_mnist/train.csv"
-    testDataPath <- "../kaggle_mnist/test.csv"
 
     # Since we're only using the training data set (42000 samples),
     # as the test data set isn't labelled, it must be so that:
     # (numTrainingSamples + numTestSamples) <= 42000
-    # numTrainingSamples <- 1000
-    # numTestSamples <- 100
     numTrainingSamples <- 40000
     numTestSamples <- 1500
 
