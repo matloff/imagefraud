@@ -13,3 +13,5 @@ each block should have approximately the same amount if the image is completely 
 # Sources
 
 N. B. A. Warif, M. Y. I. Idris, A. W. A. Wahab and R. Salleh, "An evaluation of Error Level Analysis in image forensics," 2015 5th IEEE International Conference on System Engineering and Technology (ICSET), Shah Alam, 2015, pp. 23-28.
+
+https://fotoforensics.com/tutorial-ela.php
