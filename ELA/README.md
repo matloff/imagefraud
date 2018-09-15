@@ -18,3 +18,5 @@ Credits for the use of the CASIA Image Tempering Detection Evaluation Database (
 N. B. A. Warif, M. Y. I. Idris, A. W. A. Wahab and R. Salleh, "An evaluation of Error Level Analysis in image forensics," 2015 5th IEEE International Conference on System Engineering and Technology (ICSET), Shah Alam, 2015, pp. 23-28.
 
 https://fotoforensics.com/tutorial-ela.php
+
+Gunawan, Teddy & Hanafiah, S.A.M. & Kartiwi, Mira & Ismail, Nanang & Zabah, Nor & Nordin, A.N.. (2017). Development of photo forensics algorithm by detecting photoshop manipulation using error level analysis. 7. 131-137. 10.11591/ijeecs.v7.i1.pp131-137. 
