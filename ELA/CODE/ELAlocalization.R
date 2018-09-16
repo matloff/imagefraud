@@ -17,4 +17,4 @@ imagesc(im_out)
 
 image<- '/Users/robinyancey/desktop/Tp_D_NNN_M_N_ani10132_ani10123_12477.jpg'
 #image<- '/Users/robinyancey/desktop/Tp_D_NRN_S_N_ani10210_ani10209_12373.jpg'
-ELAlocalization(image, Q=0.9, scale=25)
+ELAlocalization(image, Q=0.95, scale=25)
