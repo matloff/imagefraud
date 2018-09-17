@@ -8,6 +8,10 @@
 
 - NOTE: please, use this code to localize tampered regions of an imaged that is determined by RLRNpar.R to be spliced by inserting a piece of another image (not by copy-paste from the same image).
 
+ELA folder: contains a code to run an "Error Level Analysis" on JPEG images to determine the difference in compression levels throughout the image and localize forgery.
+
+- NOTE: please use this code to localize image forgery after determining the image was forged (and converting to JPEG) and using BAGlocalization to help get the best localization approximation.
+
  pcaCProbust folder: contains a working combined intensity based and PCA algorithm (under the colder folder) for image fraud,
 as well as multiple test images and output (see README with subdirectory for more information)
  
