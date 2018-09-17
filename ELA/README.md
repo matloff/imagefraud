@@ -1,9 +1,6 @@
 # Error Level Analysis
 
-Error Level Analysis can be used to localize image forgery since some parts of the image will have been saved at different quality factors. (This works on any image type, but all non-jpeg images must be converted input to JPEG format before using.)
-
-This is due to the different parts of the image having been subjected to the lossy compression multiple times or
-different levels of compression (see https://en.wikipedia.org/wiki/Error_level_analysis).
+Error Level Analysis can be used to localize image forgery since some parts of the image will have been saved at different quality factors. This is due to the different parts of the image having been subjected to the lossy compression multiple times or different levels of compression (see https://en.wikipedia.org/wiki/Error_level_analysis). (This works on any image type, but all non-jpeg images must be converted input to JPEG format before using.)
 
 # Method
 First the image is divided into 8×8 blocks and each is recompressed independently at a known quality factor (such as 95%). 
