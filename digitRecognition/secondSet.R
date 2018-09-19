@@ -17,14 +17,26 @@ plotImage <- function(imageAsRow,imageHeight=imageHeight,imageWidth=imageWidth) 
     image(imageToPlot)
 }
 
-# Returns the nine features for the given image.
-# Given image should be a ROW of pixels.
-calculateFeatureSet <- function(imageAsRow,
-    imageHeight,imageWidth,threshold) {
+# Returns three features for a horizontal box (spanning the whole
+# width of the image and the rows firstRowIndex:lastRowIndex
+# in imageAsMatrix).
+# The first feature is the area before
+# the first horizontally encountered white-to-black transition.
+# The second feature is the area before the second horizontally
+# encountered white-to-black transition is encountered.
+# The third feature is this area for further transitions.
+# Set leftToRight to FALSE if wish to analyze right to left.
+analyzeHorizontalBox <- function(imageAsMatrix, leftToRight,
+                            firstRowIndex,lastRowIndex, threshold) {
+    imageHeight <- nrow(imageAsMatrix)
+    imageWidth <- ncol(imageAsMatrix)
 
-    imageArea = imageHeight * imageWidth
-    imageAsMatrix <- matrix(imageAsRow,nrow=imageHeight,ncol=imageWidth,
-                            byrow=TRUE)
+    # For telling the below code to go the correct direction:
+    if (leftToRight) {
+        columnIndicesRange <- 2:ncol(imageAsMatrix)
+    } else {
+        columnIndicesRange <- (imageWidth-1):1
+    }
 
     # Calculate horizontal features for top bounding box.
     # Areas defined by first, second, and further transitions.
@@ -33,161 +45,69 @@ calculateFeatureSet <- function(imageAsRow,
     areaOtherTransitions <- 0
     # Go through each row, keeping track of which transition
     # we're on, and update the areas.
-    for (rowIndex in 1:floor(imageHeight/2))
+    for (rowIndex in firstRowIndex:lastRowIndex)
     {
         reachedFirstTransition <- FALSE
         reachedSecondTransition <- FALSE
-        for (colIndex in 2:imageWidth)
+        for (colIndex in columnIndicesRange)
         {
             # Check if found transition from white to black.
-            prevPixel <- imageAsMatrix[rowIndex,colIndex-1]
+            if (leftToRight) {
+                prevPixel <- imageAsMatrix[rowIndex,colIndex-1]
+            } else {
+                prevPixel <- imageAsMatrix[rowIndex,colIndex+1]
+            }
             currentPixel <- imageAsMatrix[rowIndex,colIndex]
             if (prevPixel >= threshold &
                 currentPixel < threshold)
             {
+                # Calculate area before this transition, depending
+                # on whether we were going left-to-right or right-to-left.
+                if (leftToRight) {
+                    areaBeforeTransition <- colIndex - 1
+                } else {
+                    areaBeforeTransition <- imageWidth - colIndex
+                }
+
                 if (!reachedFirstTransition)
                 {
                     reachedFirstTransition <- TRUE
                     areaFirstTransition <-
-                        areaFirstTransition + (colIndex-1)
+                        areaFirstTransition + areaBeforeTransition
                 } else if (!reachedSecondTransition) {
                     reachedSecondTransition <- TRUE
                     areaSecondTransition <-
-                        areaSecondTransition + (colIndex-1)
+                        areaSecondTransition + areaBeforeTransition
                 } else {
                     areaOtherTransitions <-
-                        areaOtherTransitions + (colIndex-1)
+                        areaOtherTransitions + areaBeforeTransition
                 }
             }
         }
     }
-    horizontalTopHalfFeatures <-
-        c(areaFirstTransition / (imageArea / 2),
-          areaSecondTransition / (imageArea / 2),
-          areaOtherTransitions / (imageArea / 2))
+    imageArea <- imageHeight * imageWidth
+    return(c(areaFirstTransition / (imageArea / 2),
+             areaSecondTransition / (imageArea / 2),
+             areaOtherTransitions / (imageArea / 2)))
+}
 
-    # Calculate LEFTWARD horizontal features for top bounding box.
-    # Areas defined by first, second, and further transitions.
+# Returns three features for a vertical box (spanning the whole
+# height of the image and the columns firstColIndex:lastColIndex
+# in imageAsMatrix).
+# The first feature is the area before the first vertically
+# encountered white-to-black transition.
+# The second feature is the area before the second vertically
+# encountered white-to-black transition is encountered.
+# The third feature is this area for further transitions.
+analyzeVerticalBox <- function(imageAsMatrix,
+    firstColIndex, lastColIndex, threshold) {
+    imageHeight <- nrow(imageAsMatrix)
+    imageWidth <- ncol(imageAsMatrix)
+
     areaFirstTransition <- 0
     areaSecondTransition <- 0
     areaOtherTransitions <- 0
-    # Go through each row, keeping track of which transition
-    # we're on, and update the areas.
-    for (rowIndex in 1:floor(imageHeight/2))
-    {
-        reachedFirstTransition <- FALSE
-        reachedSecondTransition <- FALSE
-        for (colIndex in (imageWidth-1):1)
-        {
-            # Check if found transition from white to black.
-            prevPixel <- imageAsMatrix[rowIndex,colIndex+1]
-            currentPixel <- imageAsMatrix[rowIndex,colIndex]
-            if (prevPixel >= threshold &
-                currentPixel < threshold)
-            {
-                if (!reachedFirstTransition)
-                {
-                    reachedFirstTransition <- TRUE
-                    areaFirstTransition <-
-                        areaFirstTransition + (imageWidth - colIndex)
-                } else if (!reachedSecondTransition) {
-                    reachedSecondTransition <- TRUE
-                    areaSecondTransition <-
-                        areaSecondTransition + (imageWidth - colIndex)
-                } else {
-                    areaOtherTransitions <-
-                        areaOtherTransitions + (imageWidth - colIndex)
-                }
-            }
-        }
-    }
-    horizontalTopHalfLeftwardFeatures <-
-        c(areaFirstTransition / (imageArea / 2),
-          areaSecondTransition / (imageArea / 2),
-          areaOtherTransitions / (imageArea / 2))
-
-    # Calculate horizontal features for bottom bounding box.
-    # Areas defined by first, second, and further transitions.
-    areaFirstTransition <- 0
-    areaSecondTransition <- 0
-    areaOtherTransitions <- 0
-    for (rowIndex in (floor(imageHeight/2)+1):imageHeight)
-    {
-        reachedFirstTransition <- FALSE
-        reachedSecondTransition <- FALSE
-        for (colIndex in 2:imageWidth)
-        {
-            # Check if found transition from white to black.
-            prevPixel <- imageAsMatrix[rowIndex,colIndex-1]
-            currentPixel <- imageAsMatrix[rowIndex,colIndex]
-            if (prevPixel >= threshold &
-                currentPixel < threshold)
-            {
-                if (!reachedFirstTransition)
-                {
-                    reachedFirstTransition <- TRUE
-                    areaFirstTransition <-
-                        areaFirstTransition + (colIndex-1)
-                } else if (!reachedSecondTransition) {
-                    reachedSecondTransition <- TRUE
-                    areaSecondTransition <-
-                        areaSecondTransition + (colIndex-1)
-                } else {
-                    areaOtherTransitions <-
-                        areaOtherTransitions + (colIndex-1)
-                }
-            }
-        }
-    }
-    horizontalBottomHalfFeatures <-
-        c(areaFirstTransition / (imageArea / 2),
-          areaSecondTransition / (imageArea / 2),
-          areaOtherTransitions / (imageArea / 2))
-
-    # Calculate LEFTWARD horizontal features for bottom bounding box.
-    # Areas defined by first, second, and further transitions.
-    areaFirstTransition <- 0
-    areaSecondTransition <- 0
-    areaOtherTransitions <- 0
-    for (rowIndex in (floor(imageHeight/2)+1):imageHeight)
-    {
-        reachedFirstTransition <- FALSE
-        reachedSecondTransition <- FALSE
-        for (colIndex in (imageWidth-1):1)
-        {
-            # Check if found transition from white to black.
-            prevPixel <- imageAsMatrix[rowIndex,colIndex+1]
-            currentPixel <- imageAsMatrix[rowIndex,colIndex]
-            if (prevPixel >= threshold &
-                currentPixel < threshold)
-            {
-                if (!reachedFirstTransition)
-                {
-                    reachedFirstTransition <- TRUE
-                    areaFirstTransition <-
-                        areaFirstTransition + (imageWidth - colIndex)
-                } else if (!reachedSecondTransition) {
-                    reachedSecondTransition <- TRUE
-                    areaSecondTransition <-
-                        areaSecondTransition + (imageWidth - colIndex)
-                } else {
-                    areaOtherTransitions <-
-                        areaOtherTransitions + (imageWidth - colIndex)
-                }
-            }
-        }
-    }
-    horizontalBottomHalfLeftwardFeatures <-
-        c(areaFirstTransition / (imageArea / 2),
-          areaSecondTransition / (imageArea / 2),
-          areaOtherTransitions / (imageArea / 2))
-
-    # Calculate vertical features.
-    # Areas defined by first, second, and further transitions.
-    areaFirstTransition <- 0
-    areaSecondTransition <- 0
-    areaOtherTransitions <- 0
-    for (colIndex in 1:imageWidth)
+    for (colIndex in firstColIndex:lastColIndex)
     {
         reachedFirstTransition <- FALSE
         reachedSecondTransition <- FALSE
@@ -215,10 +135,45 @@ calculateFeatureSet <- function(imageAsRow,
             }
         }
     }
-    verticalFeatures <-
-        c(areaFirstTransition / imageArea,
-          areaSecondTransition / imageArea,
-          areaOtherTransitions / imageArea)
+    imageArea <- imageHeight * imageWidth
+    return(c(areaFirstTransition / imageArea,
+             areaSecondTransition / imageArea,
+             areaOtherTransitions / imageArea))
+}
+
+# Returns the nine features for the given image.
+# Given image should be a ROW of pixels.
+calculateFeatureSet <- function(imageAsRow,
+    imageHeight,imageWidth,threshold) {
+
+    imageArea = imageHeight * imageWidth
+    imageAsMatrix <- matrix(imageAsRow,nrow=imageHeight,ncol=imageWidth,
+                            byrow=TRUE)
+
+    # Calculate horizontal features for top bounding box.
+    # Areas defined by first, second, and further transitions.
+    horizontalTopHalfFeatures <- analyzeHorizontalBox(imageAsMatrix,
+        TRUE, 1, floor(imageHeight/2), threshold)
+
+    # Calculate LEFTWARD horizontal features for top bounding box.
+    # Areas defined by first, second, and further transitions.
+    horizontalTopHalfLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
+            FALSE, 1, floor(imageHeight/2), threshold)
+
+    # Calculate horizontal features for bottom bounding box.
+    # Areas defined by first, second, and further transitions.
+    horizontalBottomHalfFeatures <- analyzeHorizontalBox(imageAsMatrix,
+        TRUE, floor(imageHeight/2)+1, imageHeight, threshold)
+
+    # Calculate LEFTWARD horizontal features for bottom bounding box.
+    # Areas defined by first, second, and further transitions.
+    horizontalBottomHalfLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
+        FALSE, floor(imageHeight/2)+1, imageHeight, threshold)
+
+    # Calculate vertical features.
+    # Areas defined by first, second, and further transitions.
+    verticalFeatures <- analyzeVerticalBox(imageAsMatrix,
+        1, imageWidth, threshold)
 
     return(c(horizontalTopHalfFeatures,
              horizontalTopHalfLeftwardFeatures,
