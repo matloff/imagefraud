@@ -66,6 +66,46 @@ calculateFeatureSet <- function(imageAsRow,
           areaSecondTransition / (imageArea / 2),
           areaOtherTransitions / (imageArea / 2))
 
+    # Calculate LEFTWARD horizontal features for top bounding box.
+    # Areas defined by first, second, and further transitions.
+    areaFirstTransition <- 0
+    areaSecondTransition <- 0
+    areaOtherTransitions <- 0
+    # Go through each row, keeping track of which transition
+    # we're on, and update the areas.
+    for (rowIndex in 1:floor(imageHeight/2))
+    {
+        reachedFirstTransition <- FALSE
+        reachedSecondTransition <- FALSE
+        for (colIndex in (imageWidth-1):1)
+        {
+            # Check if found transition from white to black.
+            prevPixel <- imageAsMatrix[rowIndex,colIndex+1]
+            currentPixel <- imageAsMatrix[rowIndex,colIndex]
+            if (prevPixel >= threshold &
+                currentPixel < threshold)
+            {
+                if (!reachedFirstTransition)
+                {
+                    reachedFirstTransition <- TRUE
+                    areaFirstTransition <-
+                        areaFirstTransition + (imageWidth - colIndex)
+                } else if (!reachedSecondTransition) {
+                    reachedSecondTransition <- TRUE
+                    areaSecondTransition <-
+                        areaSecondTransition + (imageWidth - colIndex)
+                } else {
+                    areaOtherTransitions <-
+                        areaOtherTransitions + (imageWidth - colIndex)
+                }
+            }
+        }
+    }
+    horizontalTopHalfLeftwardFeatures <-
+        c(areaFirstTransition / (imageArea / 2),
+          areaSecondTransition / (imageArea / 2),
+          areaOtherTransitions / (imageArea / 2))
+
     # Calculate horizontal features for bottom bounding box.
     # Areas defined by first, second, and further transitions.
     areaFirstTransition <- 0
@@ -100,6 +140,44 @@ calculateFeatureSet <- function(imageAsRow,
         }
     }
     horizontalBottomHalfFeatures <-
+        c(areaFirstTransition / (imageArea / 2),
+          areaSecondTransition / (imageArea / 2),
+          areaOtherTransitions / (imageArea / 2))
+
+    # Calculate LEFTWARD horizontal features for bottom bounding box.
+    # Areas defined by first, second, and further transitions.
+    areaFirstTransition <- 0
+    areaSecondTransition <- 0
+    areaOtherTransitions <- 0
+    for (rowIndex in (floor(imageHeight/2)+1):imageHeight)
+    {
+        reachedFirstTransition <- FALSE
+        reachedSecondTransition <- FALSE
+        for (colIndex in (imageWidth-1):1)
+        {
+            # Check if found transition from white to black.
+            prevPixel <- imageAsMatrix[rowIndex,colIndex+1]
+            currentPixel <- imageAsMatrix[rowIndex,colIndex]
+            if (prevPixel >= threshold &
+                currentPixel < threshold)
+            {
+                if (!reachedFirstTransition)
+                {
+                    reachedFirstTransition <- TRUE
+                    areaFirstTransition <-
+                        areaFirstTransition + (imageWidth - colIndex)
+                } else if (!reachedSecondTransition) {
+                    reachedSecondTransition <- TRUE
+                    areaSecondTransition <-
+                        areaSecondTransition + (imageWidth - colIndex)
+                } else {
+                    areaOtherTransitions <-
+                        areaOtherTransitions + (imageWidth - colIndex)
+                }
+            }
+        }
+    }
+    horizontalBottomHalfLeftwardFeatures <-
         c(areaFirstTransition / (imageArea / 2),
           areaSecondTransition / (imageArea / 2),
           areaOtherTransitions / (imageArea / 2))
@@ -143,7 +221,9 @@ calculateFeatureSet <- function(imageAsRow,
           areaOtherTransitions / imageArea)
 
     return(c(horizontalTopHalfFeatures,
+             horizontalTopHalfLeftwardFeatures,
              horizontalBottomHalfFeatures,
+             horizontalBottomHalfLeftwardFeatures,
              verticalFeatures))
 }
 
@@ -211,14 +291,6 @@ computeSetFeatures <- function(imagesAsRows,imageHeight,imageWidth,numPixelsPerI
         allImagesFeatures <- rbind(allImagesFeatures, c(imageFeatures,label))
     }
 
-    # Some formatting.
-    allImagesFeatures <- as.data.frame(allImagesFeatures)
-    names(allImagesFeatures) <- c("fh1_top", "fh2_top", "fh3_top",
-                                    "fh1_bot", "fh2_bot", "fh3_bot",
-                                    "fv1", "fv2", "fv3",
-                                    "truths")
-    allImagesFeatures$truths <- as.factor(allImagesFeatures$truths)
-
     return(allImagesFeatures)
 }
 
@@ -229,7 +301,8 @@ trainClassifier <- function(trainingSetFeatures) {
 
 # Returns predicted labels.
 generatePredictions <- function(classifier,testSetFeatures) {
-    predictedLabels <- ovalogpred(classifier,testSetFeatures[,1:9])
+    numCols <- ncol(testSetFeatures)  # for excluding last column (labels)
+    predictedLabels <- ovalogpred(classifier, testSetFeatures[,1:(numCols-1)])
     return(predictedLabels)
 }
 
@@ -263,8 +336,7 @@ secondSet <- function(trainingDataPath,testDataPath,
     print(computeConfusionMatrix(testMNIST$y, predictedLabels))
 }
 
-runWithMNIST <- function(trainingDataPath="../kaggle_mnist/train.csv",
-						 testDataPath="../kaggle_mnist/test.csv") {
+runWithMNIST <- function(trainingDataPath, testDataPath) {
     # Specific to the MNIST data set.
     imageHeight <- 28
     imageWidth <- 28
