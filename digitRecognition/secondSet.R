@@ -173,10 +173,18 @@ calculateFeatureSet <- function(imageAsRow,
         }
     }
 
-    # Calculate vertical features.
-    features <- c(features,
-        analyzeVerticalBox(imageAsMatrix,
-            1, imageWidth, threshold))
+    # Add three features per vertical box.
+    boxEnd <- 0
+    for (i in 1:numVerticalBoxes) {
+        # Update vars to go to next vertical box.
+        boxStart <- boxEnd + 1
+        boxEnd <- floor(i * imageWidth/numVerticalBoxes)
+
+        # Add features for this box.
+        features <- c(features,
+            analyzeVerticalBox(imageAsMatrix, boxStart,
+                boxEnd, threshold))
+    }
 
     return(features)
 
@@ -369,8 +377,9 @@ secondSet <- function(trainingDataPath,testDataPath,
         numHorizontalBoxes, includeLeftwardHorizontalBoxes,
         numVerticalBoxes)
 
-    print("Num features: ")
-    print(ncol(trainingSetFeatures) - 1)
+    print(paste("Num features: ", (ncol(trainingSetFeatures) - 1)))
+    print(paste("Num horizontal boxes: ", numHorizontalBoxes))
+    print(paste("Num vertical boxes: ", numVerticalBoxes))
 
     # Set up test data features.
     # Since the test data is unlabelled, we use some data from the
@@ -409,7 +418,7 @@ runWithMNIST <- function(trainingDataPath, testDataPath) {
 
     numHorizontalBoxes <- 4
     includeLeftwardHorizontalBoxes <- TRUE
-    numVerticalBoxes <- 1
+    numVerticalBoxes <- 3
 
     secondSet(trainingDataPath,testDataPath,imageHeight,imageWidth,
         numPixelsPerImage,numTrainingSamples,numTestSamples,
