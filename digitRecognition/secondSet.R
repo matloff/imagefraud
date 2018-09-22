@@ -144,11 +144,41 @@ analyzeVerticalBox <- function(imageAsMatrix,
 # Returns the nine features for the given image.
 # Given image should be a ROW of pixels.
 calculateFeatureSet <- function(imageAsRow,
-    imageHeight,imageWidth,threshold) {
+    imageHeight,imageWidth,threshold,
+    numHorizontalBoxes,
+    includeLeftwardHorizontalBoxes, # TRUE to include right-to-left horizontal boxes
+    numVerticalBoxes) {  # vertical boxes are only downwards
 
-    imageArea = imageHeight * imageWidth
+    imageArea <- imageHeight * imageWidth
     imageAsMatrix <- matrix(imageAsRow,nrow=imageHeight,ncol=imageWidth,
                             byrow=TRUE)
+
+    features <- c()
+
+    # Add three (or six, if have leftward) features per horizontal box.
+    boxEnd <- 0
+    for (i in 1:numHorizontalBoxes) {
+        # Update vars to go to next horizontal box.
+        boxStart <- boxEnd + 1
+        boxEnd <- floor(i * imageHeight/numHorizontalBoxes)
+
+        # Add rightward features for this box.
+        features <- c(features, analyzeHorizontalBox(imageAsMatrix,
+            TRUE, boxStart, boxEnd, threshold))
+        if (includeLeftwardHorizontalBoxes) {
+            # Add leftward features for this box.
+            features <- c(features,
+                analyzeHorizontalBox(imageAsMatrix,
+                    FALSE, boxStart, boxEnd, threshold))
+        }
+    }
+
+    # Calculate vertical features.
+    features <- c(features,
+        analyzeVerticalBox(imageAsMatrix,
+            1, imageWidth, threshold))
+
+    return(features)
 
     # # Calculate horizontal features for top bounding box.
     # # Areas defined by first, second, and further transitions.
@@ -186,37 +216,37 @@ calculateFeatureSet <- function(imageAsRow,
     # horizontalBottomThirdLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
     #     FALSE, floor(2*imageHeight/3)+1, imageHeight, threshold)
 
-    horizontalFirstFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
-        TRUE, 1, floor(imageHeight/4), threshold)
-    horizontalSecondFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
-        TRUE, floor(imageHeight/4)+1, floor(2*imageHeight/4), threshold)
-    horizontalThirdFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
-        TRUE, floor(2*imageHeight/4)+1, floor(3*imageHeight/4), threshold)
-    horizontalBottomFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
-        TRUE, floor(3*imageHeight/4)+1, imageHeight, threshold)
-    horizontalFirstFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-        FALSE, 1, floor(imageHeight/4), threshold)
-    horizontalSecondFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-        FALSE, floor(imageHeight/4)+1, floor(2*imageHeight/4), threshold)
-    horizontalThirdFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-        FALSE, floor(2*imageHeight/4)+1, floor(3*imageHeight/4), threshold)
-    horizontalBottomFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-        FALSE, floor(3*imageHeight/4)+1, imageHeight, threshold)
+    # horizontalFirstFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
+    #     TRUE, 1, floor(imageHeight/4), threshold)
+    # horizontalSecondFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
+    #     TRUE, floor(imageHeight/4)+1, floor(2*imageHeight/4), threshold)
+    # horizontalThirdFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
+    #     TRUE, floor(2*imageHeight/4)+1, floor(3*imageHeight/4), threshold)
+    # horizontalBottomFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
+    #     TRUE, floor(3*imageHeight/4)+1, imageHeight, threshold)
+    # horizontalFirstFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
+    #     FALSE, 1, floor(imageHeight/4), threshold)
+    # horizontalSecondFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
+    #     FALSE, floor(imageHeight/4)+1, floor(2*imageHeight/4), threshold)
+    # horizontalThirdFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
+    #     FALSE, floor(2*imageHeight/4)+1, floor(3*imageHeight/4), threshold)
+    # horizontalBottomFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
+    #     FALSE, floor(3*imageHeight/4)+1, imageHeight, threshold)
 
-    # Calculate vertical features.
-    # Areas defined by first, second, and further transitions.
-    verticalFeatures <- analyzeVerticalBox(imageAsMatrix,
-        1, imageWidth, threshold)
+    # # Calculate vertical features.
+    # # Areas defined by first, second, and further transitions.
+    # verticalFeatures <- analyzeVerticalBox(imageAsMatrix,
+    #     1, imageWidth, threshold)
 
-    return(c(horizontalFirstFourthFeatures,
-             horizontalSecondFourthFeatures,
-             horizontalThirdFourthFeatures,
-             horizontalBottomFourthFeatures,
-             horizontalFirstFourthLeftwardFeatures,
-             horizontalSecondFourthLeftwardFeatures,
-             horizontalThirdFourthLeftwardFeatures,
-             horizontalBottomFourthLeftwardFeatures,
-             verticalFeatures))
+    # return(c(horizontalFirstFourthFeatures,
+    #          horizontalSecondFourthFeatures,
+    #          horizontalThirdFourthFeatures,
+    #          horizontalBottomFourthFeatures,
+    #          horizontalFirstFourthLeftwardFeatures,
+    #          horizontalSecondFourthLeftwardFeatures,
+    #          horizontalThirdFourthLeftwardFeatures,
+    #          horizontalBottomFourthLeftwardFeatures,
+    #          verticalFeatures))
 
     # return(c(horizontalTopThirdFeatures,
     #          horizontalMiddleThirdFeatures,
@@ -284,7 +314,12 @@ computeConfusionMatrix <- function(correctLabels, predictedLabels,
     return(confusionMatrix)
 }
 
-computeSetFeatures <- function(imagesAsRows,imageHeight,imageWidth,numPixelsPerImage) {
+computeSetFeatures <- function(
+    imagesAsRows,imageHeight,imageWidth,
+    numPixelsPerImage,
+    numHorizontalBoxes,
+    includeLeftwardHorizontalBoxes, # TRUE to include right-to-left horizontal boxes
+    numVerticalBoxes) {  # vertical boxes are only downwards
     allImagesFeatures <- c() # features for each image in imagesAsRows
 
     # Go through each row (each row is an image), calculate the
@@ -293,7 +328,10 @@ computeSetFeatures <- function(imagesAsRows,imageHeight,imageWidth,numPixelsPerI
     {
         imageAsRow <- imagesAsRows[rowIndex,1:numPixelsPerImage]
         imageFeatures <- calculateFeatureSet(imageAsRow,imageHeight,
-                                          imageWidth,1)
+                                          imageWidth,1,
+                                          numHorizontalBoxes,
+                                          includeLeftwardHorizontalBoxes,
+                                          numVerticalBoxes)
         # store this feature set somewhere, attaching the label to the end
         # of the row
         label <- imagesAsRows[rowIndex,numPixelsPerImage+1]
@@ -318,11 +356,18 @@ generatePredictions <- function(classifier,testSetFeatures) {
 secondSet <- function(trainingDataPath,testDataPath,
                       imageHeight,imageWidth,
                       numPixelsPerImage,numTrainingSamples,
-                      numTestSamples) {
+                      numTestSamples,
+                      numHorizontalBoxes,
+                      # TRUE to include right-to-left horizontal boxes
+                      includeLeftwardHorizontalBoxes,
+                      # vertical boxes are only downwards
+                      numVerticalBoxes) {
     # Set up training data features.
     trainMNIST <- loadData(trainingDataPath,1,numTrainingSamples)
     trainingSetFeatures <- computeSetFeatures(
-        trainMNIST,imageHeight,imageWidth,numPixelsPerImage)
+        trainMNIST,imageHeight,imageWidth,numPixelsPerImage,
+        numHorizontalBoxes, includeLeftwardHorizontalBoxes,
+        numVerticalBoxes)
 
     print("Num features: ")
     print(ncol(trainingSetFeatures) - 1)
@@ -332,7 +377,9 @@ secondSet <- function(trainingDataPath,testDataPath,
     # the training set, which is labelled.
     testMNIST <- loadData(trainingDataPath,(numTrainingSamples+1),numTestSamples)
     testSetFeatures <- computeSetFeatures(
-        testMNIST,imageHeight,imageWidth,numPixelsPerImage)
+        testMNIST,imageHeight,imageWidth,numPixelsPerImage,
+        numHorizontalBoxes, includeLeftwardHorizontalBoxes,
+        numVerticalBoxes)
     # print("True labels: ")
     # print(testMNIST$y)
 
@@ -360,6 +407,12 @@ runWithMNIST <- function(trainingDataPath, testDataPath) {
     numTrainingSamples <- 40000
     numTestSamples <- 1500
 
+    numHorizontalBoxes <- 4
+    includeLeftwardHorizontalBoxes <- TRUE
+    numVerticalBoxes <- 1
+
     secondSet(trainingDataPath,testDataPath,imageHeight,imageWidth,
-        numPixelsPerImage,numTrainingSamples,numTestSamples)
+        numPixelsPerImage,numTrainingSamples,numTestSamples,
+        numHorizontalBoxes, includeLeftwardHorizontalBoxes,
+        numVerticalBoxes)
 }
