@@ -4,13 +4,13 @@
 
  - NOTE: please, use this code for detecting just whether an image is fraudulent or not as it is the fastest, easiest to use and most accurate
  
- BAGlocalization folder: This code uses the Block Artifact Grid to measure differences in the compression rate and quality factor of image blocks used in JPEG compression. Those blocks with a different factor are highlighted in red/yellow in the output heat map.
-
-- NOTE: please, use this code to localize tampered regions of an imaged that is determined by RLRNpar.R to be spliced by inserting a piece of another image (not by copy-paste from the same image).
+BAGlocalization folder: This code uses the Block Artifact Grid (BAG) to measure differences in the compression rate and quality factor of image blocks used in JPEG compression. Those blocks with a different factor are highlighted in red/yellow in the output heat map.
 
 ELA folder: contains a code to run an "Error Level Analysis" on JPEG images to determine the difference in compression levels throughout the image and localize forgery.
 
-- NOTE: please use this code to localize image forgery after determining the image was forged (and converting to JPEG) and using BAGlocalization to help get the best localization approximation.
+combinedLocalization folder: contains a code to combine BAG extraction and ELA with calls to rmBoxAvErrors.R and zeroOne.R to produce a highly localized output image. rmBoxAvErrors.R removes boxes with average errors less than a threshold to remove flas positives, while zeroOne.R writes the leftover pixels to 1 or 0 using another threshold.
+
+- NOTE: please use this code to localize image forgery after determining the image was forged (and converting to JPEG) to help get the best localization approximation. First, be sure the image is determined by RLRNpar.R to be spliced by inserting a piece of another image (not by copy-paste from the same image).
 
  pcaCProbust folder: contains a working combined intensity based and PCA algorithm (under the colder folder) for image fraud,
 as well as multiple test images and output (see README with subdirectory for more information)
