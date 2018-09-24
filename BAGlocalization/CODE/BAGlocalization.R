@@ -1,4 +1,3 @@
-# maybe will make filter length input
 
 BAGlocalization <- function(image){
   require(EBImage) # load image
@@ -6,7 +5,6 @@ BAGlocalization <- function(image){
   require(pracma) # histogram 
   require(smoother) # gaussian filter
   require(Rlibeemd) # extrema
-  require(matlab) # display heat map image
   
   im1<- readImage(image) 
   
@@ -81,9 +79,9 @@ BAGlocalization <- function(image){
     ext <- extrema(filter)
     
     if (!none){
-    # the number of extreme values in the filtered histogram of DCT can be used to find the 
-    # estimated Q table coefficient
-    Q[row,col] <- length(ext$minima[,1])-2
+      # the number of extreme values in the filtered histogram of DCT can be used to find the 
+      # estimated Q table coefficient
+      Q[row,col] <- length(ext$minima[,1])-2
     }
     
   }
@@ -99,12 +97,18 @@ BAGlocalization <- function(image){
     imblocks2[s] <- sum(sum(imblocks[1:8,1:8,s]))}
   # reformulate blocks (with artifacts) into compressed image 
   imblocks <- t(matrix(imblocks2, c(dim(im)[1]/8, dim(im)[2]/8)))
-  # display image as heat map
-  imagesc(x=seq(ncol(imblocks)), y=seq(nrow(imblocks)), imblocks, col=jet.colors(128))
+  
+  # imagesc(imblocks)
+  require('OpenImageR')
+  imblocks <- t(imblocks)
+  imblocksB <- resizeImage(imblocks, dim(im)[1], dim(im)[2], method = "nearest")
+  im_out <- t(imblocksB)
+
 }
 
 #image<- '/Users/robinyancey/desktop/Tp_D_NNN_M_N_ani10132_ani10123_12477.jpg'
 #image<- '/Users/robinyancey/desktop/Tp_D_CND_S_N_ani00073_ani00068_00193.tif'
 image<- '/Users/robinyancey/desktop/Tp_D_NRN_S_N_ani10210_ani10209_12373.jpg'
 
-BAGlocalization(image)
+im_out <- BAGlocalization(image)
+display(im_out)
