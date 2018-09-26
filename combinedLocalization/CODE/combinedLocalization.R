@@ -1,9 +1,22 @@
+#image<- '/Users/robinyancey/desktop/Tp_D_NNN_M_N_ani10132_ani10123_12477.jpg'
+#image<- '/Users/robinyancey/desktop/Tp_D_CND_S_N_ani00073_ani00068_00193.tif'
+image<- '/Users/robinyancey/desktop/Tp_D_CRN_S_B_nat10153_ani00001_12136.jpg'
 thresh <- 0.3
-image<- '/Users/robinyancey/desktop/Tp_D_NRN_S_N_ani10210_ani10209_12373.jpg'
-
-combinedLocalization <- function(image,thresh){
+NI <- F
+#image<- '/Users/robinyancey/desktop/demo3.jpg'
+combinedLocalization <- function(image, thresh=0.3, NI=F){
+  
 im_out <- BAGlocalization(image)
 display(im_out)
+
+if (NI == T){
+  im_out1 <- noiseImage(image)
+  display(im_out1)
+  im_out1 <- im_out1[1:nrow(im_out),1:ncol(im_out)]
+  im_out <- im_out1 + im_out
+  display(im_out)
+}
+
 im_out2 <- ELAlocalization(image, Q=0.95, scale=25)
 display(im_out2)
 
@@ -30,5 +43,6 @@ display(im_out6)
 im_out6
 }
 
-im_out <- combinedLocalization(image,thresh)
+im_out <- combinedLocalization(image,thresh, T)
+
 display(im_out)
