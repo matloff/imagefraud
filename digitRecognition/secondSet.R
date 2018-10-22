@@ -187,90 +187,6 @@ calculateFeatureSet <- function(imageAsRow,
     }
 
     return(features)
-
-    # # Calculate horizontal features for top bounding box.
-    # # Areas defined by first, second, and further transitions.
-    # horizontalTopHalfFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, 1, floor(imageHeight/2), threshold)
-
-    # # Calculate LEFTWARD horizontal features for top bounding box.
-    # # Areas defined by first, second, and further transitions.
-    # horizontalTopHalfLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #         FALSE, 1, floor(imageHeight/2), threshold)
-
-    # # Calculate horizontal features for bottom bounding box.
-    # # Areas defined by first, second, and further transitions.
-    # horizontalBottomHalfFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, floor(imageHeight/2)+1, imageHeight, threshold)
-
-    # # Calculate LEFTWARD horizontal features for bottom bounding box.
-    # # Areas defined by first, second, and further transitions.
-    # horizontalBottomHalfLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     FALSE, floor(imageHeight/2)+1, imageHeight, threshold)
-
-    # horizontalFeatures <- analyzeHorizontalBox(imageAsMatrix, TRUE,
-    #     1, imageHeight, threshold)
-
-    # horizontalTopThirdFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, 1, floor(imageHeight/3), threshold)
-    # horizontalMiddleThirdFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, floor(imageHeight/3)+1, floor(2*imageHeight/3), threshold)
-    # horizontalBottomThirdFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, floor(2*imageHeight/3)+1, imageHeight, threshold)
-    # horizontalTopThirdLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     FALSE, 1, floor(imageHeight/3), threshold)
-    # horizontalMiddleThirdLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     FALSE, floor(imageHeight/3)+1, floor(2*imageHeight/3), threshold)
-    # horizontalBottomThirdLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     FALSE, floor(2*imageHeight/3)+1, imageHeight, threshold)
-
-    # horizontalFirstFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, 1, floor(imageHeight/4), threshold)
-    # horizontalSecondFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, floor(imageHeight/4)+1, floor(2*imageHeight/4), threshold)
-    # horizontalThirdFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, floor(2*imageHeight/4)+1, floor(3*imageHeight/4), threshold)
-    # horizontalBottomFourthFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     TRUE, floor(3*imageHeight/4)+1, imageHeight, threshold)
-    # horizontalFirstFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     FALSE, 1, floor(imageHeight/4), threshold)
-    # horizontalSecondFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     FALSE, floor(imageHeight/4)+1, floor(2*imageHeight/4), threshold)
-    # horizontalThirdFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     FALSE, floor(2*imageHeight/4)+1, floor(3*imageHeight/4), threshold)
-    # horizontalBottomFourthLeftwardFeatures <- analyzeHorizontalBox(imageAsMatrix,
-    #     FALSE, floor(3*imageHeight/4)+1, imageHeight, threshold)
-
-    # # Calculate vertical features.
-    # # Areas defined by first, second, and further transitions.
-    # verticalFeatures <- analyzeVerticalBox(imageAsMatrix,
-    #     1, imageWidth, threshold)
-
-    # return(c(horizontalFirstFourthFeatures,
-    #          horizontalSecondFourthFeatures,
-    #          horizontalThirdFourthFeatures,
-    #          horizontalBottomFourthFeatures,
-    #          horizontalFirstFourthLeftwardFeatures,
-    #          horizontalSecondFourthLeftwardFeatures,
-    #          horizontalThirdFourthLeftwardFeatures,
-    #          horizontalBottomFourthLeftwardFeatures,
-    #          verticalFeatures))
-
-    # return(c(horizontalTopThirdFeatures,
-    #          horizontalMiddleThirdFeatures,
-    #          horizontalBottomThirdFeatures,
-    #          horizontalTopThirdLeftwardFeatures,
-    #          horizontalMiddleThirdLeftwardFeatures,
-    #          horizontalBottomThirdLeftwardFeatures,
-    #          verticalFeatures))
-
-    # return(c(horizontalFeatures,verticalFeatures))
-
-    # return(c(horizontalTopHalfFeatures,
-    #          horizontalTopHalfLeftwardFeatures,
-    #          horizontalBottomHalfFeatures,
-    #          horizontalBottomHalfLeftwardFeatures,
-    #          verticalFeatures))
 }
 
 # Returns data after moving labels column from first to last column.
@@ -284,7 +200,8 @@ loadData <- function(dataPath,firstSample,numSamples) {
     y <- rawfile$label
     tmp <- cbind(rawfile,y)
 
-    # Only keep the desired samples.
+    # Only keep the desired samples, deleting the first column
+    # (label's old column) as well.
     return(tmp[firstSample:(firstSample+numSamples-1),2:ncol(tmp)])
 }
 
@@ -416,7 +333,7 @@ runWithMNIST <- function(trainingDataPath, testDataPath) {
     numTrainingSamples <- 40000
     numTestSamples <- 1500
 
-    numHorizontalBoxes <- 4
+    numHorizontalBoxes <- 5
     includeLeftwardHorizontalBoxes <- TRUE
     numVerticalBoxes <- 3
 
