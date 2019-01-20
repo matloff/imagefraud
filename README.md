@@ -1,5 +1,7 @@
 # imagefraud Directories:
 
+ela_2ndstrm_FasterRCNN: This code uses a library for Faster-RCNN (Faster Region Proposal - Convolutional Neural Network: one of the most popular object detection methods in machine learning) using the GPU version of Tensorflow. It was found that object detection networks can be trained to detect tampered regions (instead of objects), and furthermore that using two streams (bi-linearly pooled, and one with pre-filtered input images) (will cite paper) improves accuracy.  In my experiments I tested using ELA on the images input to the second stream (instead of noise filtering like in the paper), and I have recieved improved detection accuracy over the single stream RGB network.
+
  RLRNpar folder: This is code uses a chroma-based method of feature analysis using Run Length Run Number (RLRN) endcoding. It trains a GLM model  based on this feature array from a user input of an entire database of images. (For example, when trained with only 220 images it will then be able to detect whether an input image is has any type of image fraud or not with 97% accuracy.) (see README with subdirectory for more information)
 
  - NOTE: please, use this code for detecting just whether an image is fraudulent or not as it is the fastest, easiest to use and most accurate
@@ -26,9 +28,3 @@ as well as multiple test images and output (see README with subdirectory for mor
 
 
 
-# NEXT TASKS:
-
-There are lots of improvements that can be made to the Block Artifact Grid method and lots of research out on this. I would like to test use of methods to improve this such as first digit probability distribution features, MLE, and local noise discrepancies.
-
-Implement the paper here: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7084319
-(which also uses blocking and database model training, but a more sophisticated method of feature generation) and compare this to RLRN (and/or use it for improving it) already have a good understandng of method which is also based on Steganalysis)
